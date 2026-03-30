@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users: only own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Projects: freelancer owns their projects; public read by publicLinkId
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      // Public read for client portal (no auth)
+      allow read: if resource.data.publicLinkId != null;
+    }
+
+    // Tasks: freelancer who owns the project; clients can read via project
+    match /tasks/{taskId} {
+      allow read: if true; // public read (portal uses publicLinkId check at app level)
+      allow write: if request.auth != null;
+    }
+
+    // Messages: authenticated write; public read for client portal
+    match /messages/{messageId} {
+      allow read: if true;
+      allow create: if true; // clients write without auth
+      allow update, delete: if request.auth != null;
+    }
+
+    // Files: authenticated write; public read for portal
+    match /files/{fileId} {
+      allow read: if true;
+      allow create: if true; // clients upload without auth
+      allow update, delete: if request.auth != null;
+    }
+  }
+}

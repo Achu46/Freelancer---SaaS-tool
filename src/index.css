@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    min-height: 100vh;
+  }
+
+  .dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { @apply bg-transparent; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+.dark ::-webkit-scrollbar-thumb { @apply bg-slate-700; }
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gradient background */
+.gradient-bg {
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Shine effect on cards */
+@keyframes shine {
+  from { left: -200%; }
+  to { left: 200%; }
+}
+
+.card-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -200%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
+  animation: shine 3s ease-in-out infinite;
+}
+
+/* Status badge colors */
+.status-pending   { @apply bg-amber-100 text-amber-700 border border-amber-200; }
+.status-progress  { @apply bg-blue-100 text-blue-700 border border-blue-200; }
+.status-done      { @apply bg-emerald-100 text-emerald-700 border border-emerald-200; }
+.status-active    { @apply bg-indigo-100 text-indigo-700 border border-indigo-200; }
+.status-completed { @apply bg-slate-100 text-slate-600 border border-slate-200; }
+.status-paused    { @apply bg-rose-100 text-rose-700 border border-rose-200; }
+
+.dark .status-pending   { @apply bg-amber-900/30 text-amber-400 border-amber-800; }
+.dark .status-progress  { @apply bg-blue-900/30 text-blue-400 border-blue-800; }
+.dark .status-done      { @apply bg-emerald-900/30 text-emerald-400 border-emerald-800; }
+.dark .status-active    { @apply bg-indigo-900/30 text-indigo-400 border-indigo-800; }
+.dark .status-completed { @apply bg-slate-800 text-slate-400 border-slate-700; }
+.dark .status-paused    { @apply bg-rose-900/30 text-rose-400 border-rose-800; }

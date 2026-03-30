@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Freelancers can manage all files within their project folders
+    match /projects/{projectId}/{allPaths=**} {
+      // Authenticated users (freelancers) can read any project file
+      allow read: if request.auth != null;
+      // Anyone (clients) can upload files to project folders — 10MB limit enforced in app
+      allow write: if request.resource.size < 10 * 1024 * 1024;
+      // Only authenticated users can delete
+      allow delete: if request.auth != null;
+    }
+  }
+}
