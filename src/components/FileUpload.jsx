@@ -8,15 +8,15 @@ function getFileIcon(type) {
   return <File size={18} className="text-slate-400" />;
 }
 
-export default function FileUpload({ onUpload, uploading, uploadProgress }) {
+export default function FileUpload({ onUpload, uploading, isCompressing, uploadProgress }) {
   const inputRef = useRef(null);
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
   function handleFile(file) {
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('File exceeds 10 MB limit');
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('File exceeds 20 MB limit');
       return;
     }
     setSelectedFile(file);
@@ -34,7 +34,7 @@ export default function FileUpload({ onUpload, uploading, uploadProgress }) {
     try {
       await onUpload(selectedFile);
       setSelectedFile(null);
-      toast.success('File uploaded successfully!');
+      // Success toast is now handled by the parent caller (e.g. ClientPortal) to avoid double notifications
     } catch (err) {
       toast.error(err.message || 'Upload failed');
     }
@@ -47,14 +47,14 @@ export default function FileUpload({ onUpload, uploading, uploadProgress }) {
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        onClick={() => !selectedFile && inputRef.current?.click()}
+        onClick={() => !selectedFile && !uploading && inputRef.current?.click()}
         className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer ${
           dragOver
             ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
             : selectedFile
             ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/10'
             : 'border-slate-300 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-        }`}
+        } ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
       >
         <input
           ref={inputRef}
@@ -68,49 +68,58 @@ export default function FileUpload({ onUpload, uploading, uploadProgress }) {
           <div className="flex items-center gap-3 justify-center">
             {getFileIcon(selectedFile.type)}
             <div className="text-left">
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate max-w-48">{selectedFile.name}</p>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{selectedFile.name}</p>
               <p className="text-xs text-slate-400">{(selectedFile.size / 1024).toFixed(1)} KB</p>
             </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
-              className="p-1 text-slate-400 hover:text-slate-600 rounded"
-            >
-              <X size={14} />
-            </button>
+            {!uploading && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                className="p-1 text-slate-400 hover:text-rose-500 rounded transition-colors"
+                title="Remove file"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
         ) : (
           <>
             <Upload size={24} className="mx-auto mb-2 text-slate-400" />
             <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Drop a file or click to browse</p>
-            <p className="text-xs text-slate-400 mt-1">Max 10 MB · Any file type</p>
+            <p className="text-xs text-slate-400 mt-1">Max 20 MB · Images compressed automatically</p>
           </>
         )}
       </div>
 
       {/* Upload progress */}
-      {uploading && (
-        <div className="space-y-1.5">
-          <div className="flex justify-between text-xs text-slate-500">
-            <span>Uploading…</span>
-            <span>{uploadProgress}%</span>
+      {(uploading || isCompressing) && (
+        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <span>
+              {isCompressing 
+                ? 'Optimizing Image...' 
+                : uploadProgress === 100 
+                ? 'Finalizing...' 
+                : 'Uploading...'}
+            </span>
+            <span>{isCompressing ? '...' : `${uploadProgress}%`}</span>
           </div>
-          <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-indigo-500 rounded-full transition-all"
-              style={{ width: `${uploadProgress}%` }}
+              className={`h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-300 ${isCompressing ? 'w-1/4 animate-pulse' : ''}`}
+              style={{ width: isCompressing ? '33%' : `${uploadProgress}%` }}
             />
           </div>
         </div>
       )}
 
       {/* Upload button */}
-      {selectedFile && !uploading && (
+      {selectedFile && !uploading && !isCompressing && (
         <button
           onClick={handleUpload}
-          className="w-full py-2.5 text-sm font-medium text-slate-900 bg-indigo-500 hover:bg-indigo-400 rounded-xl transition-colors"
+          className="w-full py-2.5 text-sm font-bold text-slate-900 bg-indigo-500 hover:bg-indigo-400 rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
           id="file-upload-btn"
         >
-          Upload File
+          Upload to Cloud
         </button>
       )}
     </div>

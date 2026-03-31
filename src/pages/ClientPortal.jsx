@@ -103,24 +103,28 @@ export default function ClientPortal() {
 
   const { tasks, loading: tasksLoading } = useTasks(project?.id);
   const { messages, sendMessage } = useMessages(project?.id);
-  const { files, uploading, uploadProgress, uploadFile } = useFiles(project?.id);
+  const { files, uploading, isCompressing, uploadProgress, uploadFile } = useFiles(project?.id);
 
   async function handleFileUpload(file) {
-    await uploadFile(file, 'client');
-
-    // Notify freelancer
-    if (freelancer?.email) {
-      await notifyFreelancer({
-        toEmail: freelancer.email,
-        toName: freelancer.displayName || 'Freelancer',
-        clientName: project.clientName,
-        projectName: project.clientName,
-        eventType: 'file_upload',
-        details: file.name,
-        portalUrl: window.location.href,
-      });
+    try {
+      await uploadFile(file, 'client');
+      toast.success('File uploaded successfully!');
+  
+      // Background Notification (non-blocking)
+      if (freelancer?.email) {
+        notifyFreelancer({
+          toEmail: freelancer.email,
+          toName: freelancer.displayName || 'Freelancer',
+          clientName: project.clientName,
+          projectName: project.clientName,
+          eventType: 'file_upload',
+          details: file.name,
+          portalUrl: window.location.href,
+        }).catch(err => console.error('Notification error:', err));
+      }
+    } catch (err) {
+      toast.error(err.message || 'Upload failed');
     }
-    toast.success('File uploaded successfully!');
   }
 
   async function handleSendMsg(e) {
@@ -300,7 +304,12 @@ export default function ClientPortal() {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-6">
             <h2 className="font-semibold text-slate-900 dark:text-white mb-5">Upload a File</h2>
 
-            <FileUpload onUpload={handleFileUpload} uploading={uploading} uploadProgress={uploadProgress} />
+            <FileUpload 
+              onUpload={handleFileUpload} 
+              uploading={uploading} 
+              isCompressing={isCompressing}
+              uploadProgress={uploadProgress} 
+            />
 
             {files.length > 0 && (
               <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
