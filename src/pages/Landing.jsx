@@ -9,7 +9,7 @@ const FEATURES = [
     desc: 'Clients upload files directly to your project without any account or hassle.',
   },
   {
-    icon: <MessageSquare className="text-violet-500" size={22} />,
+    icon: <MessageSquare className="text-indigo-500" size={22} />,
     title: 'Centralized Messages',
     desc: 'All client messages in one thread. No more digging through email chains.',
   },
@@ -24,7 +24,7 @@ const FEATURES = [
     desc: 'Each client gets a unique, secure link. No accounts needed for clients.',
   },
   {
-    icon: <BarChart3 className="text-amber-500" size={22} />,
+    icon: <BarChart3 className="text-indigo-500" size={22} />,
     title: 'Project Dashboard',
     desc: 'Manage all your client projects from one beautiful, organized dashboard.',
   },
@@ -64,7 +64,7 @@ export default function Landing() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/80 via-violet-50/40 to-white dark:from-indigo-950/30 dark:via-slate-950 dark:to-slate-950" />
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/80 via-indigo-50/40 to-white dark:from-indigo-950/30 dark:via-slate-950 dark:to-slate-950" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-radial from-indigo-400/15 to-transparent dark:from-indigo-600/10 rounded-full blur-3xl" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 text-center">
@@ -91,7 +91,7 @@ export default function Landing() {
             <Link
               to="/signup"
               id="hero-cta-signup"
-              className="flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-all hover:-translate-y-0.5"
+              className="flex items-center gap-2 px-8 py-3.5 text-base font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 transition-all hover:-translate-y-0.5"
             >
               Start for free
               <ArrowRight size={18} />
@@ -154,7 +154,7 @@ export default function Landing() {
               { step: '03', title: 'Stay organized', desc: 'Clients upload, comment, and track tasks. You get notified instantly.' },
             ].map((item) => (
               <div key={item.step} className="flex flex-col items-center text-center">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-lg mb-4 shadow-lg shadow-indigo-500/30">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg mb-4 shadow-lg shadow-indigo-500/30">
                   {item.step}
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{item.title}</h3>
@@ -176,12 +176,12 @@ export default function Landing() {
               <div key={t.name} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
                 <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className="text-amber-400 fill-amber-400" />
+                    <Star key={i} size={14} className="text-indigo-400 fill-indigo-400" />
                   ))}
                 </div>
                 <p className="text-sm text-slate-600 dark:text-slate-300 italic mb-4">"{t.quote}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
                     {t.avatar}
                   </div>
                   <div>
@@ -198,7 +198,7 @@ export default function Landing() {
       {/* CTA Banner */}
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-700 p-10 text-center shadow-2xl shadow-indigo-500/30">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-indigo-700 p-10 text-center shadow-2xl shadow-indigo-500/30">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1),_transparent)]" />
             <div className="relative">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
@@ -222,7 +222,7 @@ export default function Landing() {
       <footer className="py-10 border-t border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
               <Zap size={12} className="text-white" />
             </div>
             <span className="font-bold text-slate-700 dark:text-slate-300">

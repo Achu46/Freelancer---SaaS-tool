@@ -41,6 +41,13 @@ export function useMessages(projectId) {
       },
       (err) => {
         console.error('useMessages error:', err.code, err.message);
+        // Fallback for demo/dev
+        if (!projectId || projectId.startsWith('demo-')) {
+          setMessages([
+            { id: 'm1', text: 'Hi! I have uploaded the initial designs.', sender: 'freelancer', timestamp: { toMillis: () => Date.now() - 3600000 } },
+            { id: 'm2', text: 'Looks great! Checking them now.', sender: 'client', timestamp: { toMillis: () => Date.now() - 1800000 } },
+          ]);
+        }
         setError(err.message);
         setLoading(false);
       }

@@ -96,7 +96,7 @@ export default function FileUpload({ onUpload, uploading, uploadProgress }) {
           </div>
           <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all"
+              className="h-full bg-gradient-to-r from-indigo-500 to-indigo-500 rounded-full transition-all"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
@@ -107,7 +107,7 @@ export default function FileUpload({ onUpload, uploading, uploadProgress }) {
       {selectedFile && !uploading && (
         <button
           onClick={handleUpload}
-          className="w-full py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors"
+          className="w-full py-2.5 text-sm font-medium text-slate-900 bg-indigo-500 hover:bg-indigo-400 rounded-xl transition-colors"
           id="file-upload-btn"
         >
           Upload File

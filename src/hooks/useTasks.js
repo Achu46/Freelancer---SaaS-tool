@@ -22,6 +22,14 @@ export function useTasks(projectId) {
       setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     } catch (err) {
       console.error('useTasks error:', err);
+      // Fallback for demo/dev
+      if (!projectId || projectId.startsWith('demo-')) {
+        setTasks([
+          { id: 't1', title: 'Review initial requirements', status: 'done', dueDate: '2025-04-01' },
+          { id: 't2', title: 'Design system setup', status: 'in-progress', dueDate: '2025-04-05' },
+          { id: 't3', title: 'Final portal delivery', status: 'pending', dueDate: '2025-04-10' },
+        ]);
+      }
     } finally {
       setLoading(false);
     }

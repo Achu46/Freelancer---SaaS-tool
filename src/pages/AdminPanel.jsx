@@ -18,7 +18,7 @@ import toast from 'react-hot-toast';
 const PLAN_COLORS = {
   free:    'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
   starter: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
-  pro:     'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
+  pro:     'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
 };
 
 const STATUS_COLORS = {
@@ -31,16 +31,16 @@ const PLANS = ['free', 'starter', 'pro'];
 function StatCard({ icon, label, value, sub, color = 'indigo' }) {
   const colors = {
     indigo:  'from-indigo-500/20 to-indigo-600/5 text-indigo-600 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20',
-    violet:  'from-violet-500/20 to-violet-600/5 text-violet-600 dark:text-violet-400 border-violet-200/50 dark:border-violet-500/20',
+    violet:  'from-indigo-500/20 to-indigo-600/5 text-indigo-600 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20',
     emerald: 'from-emerald-500/20 to-emerald-600/5 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20',
-    amber:   'from-amber-500/20 to-amber-600/5 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-500/20',
+    amber:   'from-indigo-500/20 to-indigo-600/5 text-indigo-600 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20',
   };
 
   const iconGradients = {
     indigo:  'from-indigo-500 to-indigo-600 shadow-indigo-500/20',
-    violet:  'from-violet-500 to-violet-600 shadow-violet-500/20',
+    violet:  'from-indigo-500 to-indigo-600 shadow-indigo-500/20',
     emerald: 'from-emerald-500 to-emerald-600 shadow-emerald-500/20',
-    amber:   'from-amber-500 to-amber-600 shadow-amber-500/20',
+    amber:   'from-indigo-500 to-indigo-600 shadow-indigo-500/20',
   };
 
   return (
@@ -190,14 +190,14 @@ export default function AdminPanel() {
       {/* Dynamic Background Glows for Desktop */}
       <div className="hidden lg:block absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Admin Topbar */}
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-[#020617]/70 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
           <div className="flex items-center gap-3 group cursor-default">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:rotate-6 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:rotate-6 transition-transform">
               <Shield size={20} className="text-white" />
             </div>
             <div>
@@ -298,7 +298,7 @@ export default function AdminPanel() {
         <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
           <div className="flex items-center gap-2 mb-4 px-1">
             <Activity size={18} className="text-indigo-500" />
-            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-violet-500">Analytics Status</h2>
+            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-indigo-500">Analytics Status</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -316,7 +316,7 @@ export default function AdminPanel() {
               
               <div className="space-y-4">
                 {[
-                  { label: 'Pro Tier', count: realUsers.filter(u => u.plan === 'pro').length, color: 'bg-violet-500', icon: <Star size={12} /> },
+                  { label: 'Pro Tier', count: realUsers.filter(u => u.plan === 'pro').length, color: 'bg-indigo-500', icon: <Star size={12} /> },
                   { label: 'Starter Tier', count: realUsers.filter(u => u.plan === 'starter').length, color: 'bg-indigo-500', icon: <Zap size={12} /> },
                   { label: 'Free Tier', count: realUsers.filter(u => u.plan === 'free').length, color: 'bg-slate-400 dark:bg-slate-600', icon: <Clock size={12} /> },
                 ].map((tier) => (
@@ -438,7 +438,7 @@ export default function AdminPanel() {
                 {filtered.map((user) => (
                   <div key={user.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm relative group">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-lg font-extrabold shadow-md">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-lg font-extrabold shadow-md">
                         {(user.displayName || user.email || '?')[0].toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -536,7 +536,7 @@ export default function AdminPanel() {
                         <tr key={user.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all">
                           <td className="px-8 py-5">
                             <div className="flex items-center gap-4">
-                              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-base font-extrabold shadow-md transform group-hover:scale-110 transition-transform">
+                              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-base font-extrabold shadow-md transform group-hover:scale-110 transition-transform">
                                 {(user.displayName || user.email || '?')[0].toUpperCase()}
                               </div>
                               <div>
@@ -583,7 +583,7 @@ export default function AdminPanel() {
                                             key={plan}
                                             onClick={() => changePlan(user.id, plan)}
                                             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                                              user.plan === plan ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                              user.plan === plan ? 'bg-indigo-500 text-slate-900 shadow-lg shadow-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                             }`}
                                           >
                                             <span className="capitalize">{plan} Profile</span>
@@ -651,7 +651,7 @@ export default function AdminPanel() {
                       </div>
                       <div className="text-right">
                         <p className="text-base font-black text-slate-900 dark:text-white">${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg uppercase ${tx.status === 'success' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30'}`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg uppercase ${tx.status === 'success' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30'}`}>
                           {tx.status || 'Processed'}
                         </span>
                       </div>
@@ -663,7 +663,7 @@ export default function AdminPanel() {
 
             {/* Quick Stats Helper */}
             <div className="space-y-4">
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20">
+              <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20">
                 <p className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">Targeted Growth</p>
                 <p className="text-3xl font-black mb-1">${(mrr * 1.2).toFixed(2)}</p>
                 <p className="text-[10px] font-bold opacity-60">Projected 20% growth next cycle</p>
@@ -689,86 +689,7 @@ export default function AdminPanel() {
                    </div>
                    <div className="flex items-center justify-between">
                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Pro Plan</span>
-                     <span className="text-xs font-black text-violet-500">$9.99</span>
-                   </div>
-                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Real-time Transactions Section */}
-        <div className="mt-16 mb-10">
-          <div className="flex items-center gap-2 mb-6 px-1">
-             <CreditCard size={18} className="text-emerald-500" />
-             <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">System Revenue Events</h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Live Event Stream */}
-            <div className="lg:col-span-2 space-y-4">
-              {transactions.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 bg-white/40 dark:bg-slate-900/40 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-400">
-                  <RefreshCw size={32} className="opacity-20 mb-3" />
-                  <p className="font-bold text-sm">Awaiting first transaction event…</p>
-                  <p className="text-xs opacity-60">Revenue data will appear here in real-time.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {transactions.map((tx) => (
-                    <div key={tx.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex items-center justify-between group hover:shadow-lg hover:shadow-emerald-500/5 transition-all">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                          <DollarSign size={18} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900 dark:text-white">{tx.userEmail || 'System Payment'}</p>
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-                            <Calendar size={10} />
-                            {formatDate(tx.createdAt)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-base font-black text-slate-900 dark:text-white">${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg uppercase ${tx.status === 'success' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30'}`}>
-                          {tx.status || 'Processed'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Quick Stats Helper */}
-            <div className="space-y-4">
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20">
-                <p className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">Targeted Growth</p>
-                <p className="text-3xl font-black mb-1">${(mrr * 1.2).toFixed(2)}</p>
-                <p className="text-[10px] font-bold opacity-60">Projected 20% growth next cycle</p>
-                
-                <div className="mt-6 pt-6 border-t border-white/10 space-y-3 font-bold text-xs">
-                   <div className="flex justify-between items-center opacity-80">
-                     <span>Current MRR</span>
-                     <span>${mrr.toFixed(2)}</span>
-                   </div>
-                   <div className="flex justify-between items-center opacity-80">
-                     <span>Conversion Rate</span>
-                     <span>{(paidUsers.length / (realUsers.length || 1) * 100).toFixed(1)}%</span>
-                   </div>
-                </div>
-              </div>
-              
-              <div className="bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-3xl p-5">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Plan Pricing Status</p>
-                 <div className="space-y-3">
-                   <div className="flex items-center justify-between">
-                     <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Starter Plan</span>
-                     <span className="text-xs font-black text-indigo-500">$5.00</span>
-                   </div>
-                   <div className="flex items-center justify-between">
-                     <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Pro Plan</span>
-                     <span className="text-xs font-black text-violet-500">$9.99</span>
+                     <span className="text-xs font-black text-indigo-500">$9.99</span>
                    </div>
                  </div>
               </div>

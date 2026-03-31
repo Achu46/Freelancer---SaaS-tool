@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import {
   collection, query, where, getDocs, doc, getDoc,
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, IS_DEMO_MODE } from '../lib/firebase';
 import {
   Upload, MessageSquare, CheckCircle2, Clock, Loader2,
   Zap, FileText, Image, File, Send, AlertCircle,
@@ -33,6 +33,16 @@ const TASK_STATUS = {
   done: { label: 'Done', css: 'status-done', icon: <CheckCircle2 size={12} /> },
 };
 
+const DEMO_PROJECT = {
+  id: 'demo-project-id',
+  clientName: 'Demo Client',
+  clientEmail: 'client@example.com',
+  description: 'This is a sample project portal. Once you connect your Firebase, your real project data will appear here.',
+  status: 'active',
+  userId: 'demo-user-id',
+  createdAt: { toDate: () => new Date() },
+};
+
 export default function ClientPortal() {
   const { publicLinkId } = useParams();
   const [project, setProject] = useState(null);
@@ -49,9 +59,28 @@ export default function ClientPortal() {
     async function load() {
       setLoading(true);
       try {
+        // Fallback for Demo Mode
+        if (IS_DEMO_MODE) {
+          setProject(DEMO_PROJECT);
+          setFreelancer({ displayName: 'Demo Freelancer', email: 'freelancer@example.com' });
+          setLoading(false);
+          return;
+        }
+
         const q = query(collection(db, 'projects'), where('publicLinkId', '==', publicLinkId));
         const snap = await getDocs(q);
-        if (snap.empty) { setNotFound(true); return; }
+        
+        if (snap.empty) { 
+          // If in development and no project found, show demo project instead of error
+          if (import.meta.env.DEV) {
+            setProject(DEMO_PROJECT);
+            setFreelancer({ displayName: 'Demo Freelancer', email: 'freelancer@example.com' });
+          } else {
+            setNotFound(true); 
+          }
+          return; 
+        }
+
         const projectData = { id: snap.docs[0].id, ...snap.docs[0].data() };
         setProject(projectData);
 
@@ -60,7 +89,11 @@ export default function ClientPortal() {
         if (userSnap.exists()) setFreelancer(userSnap.data());
       } catch (err) {
         console.error(err);
-        setNotFound(true);
+        if (import.meta.env.DEV || IS_DEMO_MODE) {
+          setProject(DEMO_PROJECT);
+        } else {
+          setNotFound(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -157,7 +190,7 @@ export default function ClientPortal() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
                   <Zap size={12} className="text-white" />
                 </div>
                 <span className="text-xs font-medium text-slate-400 dark:text-slate-500">QueFlow Portal</span>
@@ -182,7 +215,7 @@ export default function ClientPortal() {
               id={`portal-tab-${t.id}`}
               className={`flex-1 py-2.5 text-sm font-medium rounded-xl transition-all ${
                 activeTab === t.id
-                  ? 'bg-indigo-600 text-white shadow-md'
+                  ? 'bg-indigo-500 text-slate-900 shadow-md'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
@@ -202,7 +235,7 @@ export default function ClientPortal() {
               </div>
               <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-1">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-indigo-500 to-indigo-500 rounded-full transition-all duration-500"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -254,7 +287,7 @@ export default function ClientPortal() {
                 id="portal-go-messages"
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 text-left hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all group"
               >
-                <MessageSquare size={22} className="text-violet-500 mb-3 group-hover:scale-110 transition-transform" />
+                <MessageSquare size={22} className="text-indigo-500 mb-3 group-hover:scale-110 transition-transform" />
                 <p className="font-semibold text-slate-900 dark:text-white text-sm">Leave a Message</p>
                 <p className="text-xs text-slate-400 mt-1">Send feedback or questions directly</p>
               </button>
@@ -318,7 +351,7 @@ export default function ClientPortal() {
                     <div key={msg.id} className={`flex ${isClient ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs sm:max-w-sm rounded-2xl px-4 py-2.5 ${
                         isClient
-                          ? 'bg-indigo-600 text-white rounded-br-sm'
+                          ? 'bg-indigo-500 text-slate-900 rounded-br-sm'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-sm'
                       }`}>
                         <p className="text-sm leading-relaxed">{msg.text}</p>
@@ -339,13 +372,13 @@ export default function ClientPortal() {
                 value={msgText}
                 onChange={(e) => setMsgText(e.target.value)}
                 id="client-msg-input"
-                className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
               />
               <button
                 type="submit"
                 disabled={sendingMsg || !msgText.trim()}
                 id="client-send-btn"
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-slate-900 bg-indigo-500 hover:bg-indigo-400 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send size={14} />
                 Send

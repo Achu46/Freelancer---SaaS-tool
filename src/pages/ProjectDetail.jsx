@@ -195,7 +195,7 @@ export default function ProjectDetail() {
                 <Copy size={14} />
                 Copy client link
               </button>
-              <a
+               <a
                 href={publicUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -290,7 +290,7 @@ export default function ProjectDetail() {
                   </div>
                   <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all"
+                      className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all"
                       style={{ width: `${(tasks.filter((t) => t.status === 'done').length / tasks.length) * 100}%` }}
                     />
                   </div>
@@ -325,7 +325,7 @@ export default function ProjectDetail() {
                       <div key={msg.id} className={`flex ${isFreelancer ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-xs sm:max-w-sm rounded-2xl px-4 py-2.5 ${
                           isFreelancer
-                            ? 'bg-indigo-600 text-white rounded-br-sm'
+                            ? 'bg-indigo-500 text-slate-900 rounded-br-sm'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-sm'
                         }`}>
                           <p className="text-sm leading-relaxed">{msg.text}</p>
@@ -346,13 +346,13 @@ export default function ProjectDetail() {
                   value={msgText}
                   onChange={(e) => setMsgText(e.target.value)}
                   id="send-message-input"
-                  className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
                 />
                 <button
                   type="submit"
                   disabled={sendingMsg || !msgText.trim()}
                   id="send-msg-btn"
-                  className="px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2.5 text-sm font-medium text-slate-900 bg-indigo-500 hover:bg-indigo-400 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {sendingMsg ? <Loader2 size={16} className="animate-spin" /> : 'Send'}
                 </button>

@@ -25,11 +25,11 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to={currentUser ? '/dashboard' : '/'} className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
               <Zap size={16} className="text-white" />
             </div>
             <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-              Que<span className="text-indigo-500">Flow</span>
+              Que<span className="text-indigo-600 dark:text-indigo-400">Flow</span>
             </span>
           </Link>
 
@@ -71,7 +71,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-4 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+                  className="px-4 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm"
                   id="nav-signup-btn"
                 >
                   Get started

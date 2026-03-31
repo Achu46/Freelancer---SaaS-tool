@@ -76,7 +76,7 @@ export default function Dashboard() {
   const stats = [
     { label: 'Total Projects', value: projects.length, icon: <FolderOpen size={18} className="text-indigo-500" /> },
     { label: 'Active', value: projects.filter((p) => p.status === 'active').length, icon: <TrendingUp size={18} className="text-emerald-500" /> },
-    { label: 'Completed', value: projects.filter((p) => p.status === 'completed').length, icon: <CheckCircle2 size={18} className="text-violet-500" /> },
+    { label: 'Completed', value: projects.filter((p) => p.status === 'completed').length, icon: <CheckCircle2 size={18} className="text-indigo-500" /> },
   ];
 
   return (
@@ -97,7 +97,7 @@ export default function Dashboard() {
           <button
             onClick={() => canCreate ? setShowCreate(true) : toast.error('Upgrade your plan to create more projects.')}
             id="create-project-btn"
-            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30"
+            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30"
           >
             <Plus size={17} />
             New Project
@@ -121,9 +121,9 @@ export default function Dashboard() {
 
         {/* Plan banner */}
         {plan === 'free' && (
-          <div className="mb-6 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 border border-indigo-200 dark:border-indigo-700/40 rounded-2xl px-5 py-4">
+          <div className="mb-6 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-indigo-50 dark:from-indigo-900/20 dark:to-indigo-900/20 border border-indigo-200 dark:border-indigo-700/40 rounded-2xl px-5 py-4">
             <div className="flex items-center gap-3">
-              <Crown size={20} className="text-amber-500" />
+              <Crown size={20} className="text-indigo-500" />
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">You're on the Free plan</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">1 project included · Upgrade for more</p>
@@ -149,7 +149,7 @@ export default function Dashboard() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               id="search-projects"
-              className="w-full max-w-md pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+              className="w-full max-w-md pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
             />
           </div>
         )}
@@ -161,7 +161,7 @@ export default function Dashboard() {
           </div>
         ) : projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center mb-6">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-100 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-900/30 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center mb-6">
               <Sparkles size={32} className="text-indigo-500" />
             </div>
             <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">No projects yet</h3>
@@ -171,7 +171,7 @@ export default function Dashboard() {
             <button
               onClick={() => setShowCreate(true)}
               id="empty-create-btn"
-              className="flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl transition-all shadow-md"
+              className="flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 rounded-xl transition-all shadow-md"
             >
               <Plus size={17} />
               Create your first project
@@ -204,7 +204,7 @@ export default function Dashboard() {
               required
               value={form.clientName}
               onChange={(e) => setForm((f) => ({ ...f, clientName: e.target.value }))}
-              className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
             />
           </div>
           <div>
@@ -218,7 +218,7 @@ export default function Dashboard() {
               required
               value={form.clientEmail}
               onChange={(e) => setForm((f) => ({ ...f, clientEmail: e.target.value }))}
-              className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
             />
           </div>
           <div>
@@ -231,14 +231,14 @@ export default function Dashboard() {
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
-              className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition resize-none"
+              className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition resize-none"
             />
           </div>
           <button
             type="submit"
             disabled={creating}
             id="confirm-create-project"
-            className="w-full py-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full py-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {creating ? <><Loader2 size={16} className="animate-spin" /> Creating…</> : 'Create Project'}
           </button>

@@ -29,7 +29,7 @@ export default function ProjectCard({ project, onDelete, onStatusChange }) {
   return (
     <div className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-200 overflow-hidden card-shine">
       {/* Glow accent */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] to-violet-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] to-indigo-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
 
       <div className="relative">
         {/* Top row */}
