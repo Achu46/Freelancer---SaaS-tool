@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Plus, FolderOpen, Loader2, Search, Sparkles, Crown,
   ArrowUpRight, CheckCircle2, TrendingUp,
@@ -15,6 +15,7 @@ import toast from 'react-hot-toast';
 
 export default function Dashboard() {
   const { currentUser, userProfile } = useAuth();
+  const navigate = useNavigate();
   const { projects, loading, createProject, deleteProject } = useProjects();
   const [searchParams] = useSearchParams();
   const [showCreate, setShowCreate] = useState(false);
@@ -42,7 +43,8 @@ export default function Dashboard() {
   async function handleCreate(e) {
     e.preventDefault();
     if (!canCreate) {
-      toast.error(`You've reached the ${plan} plan limit. Upgrade to add more projects.`);
+      toast.error(`You've reached the ${plan} plan limit. Redirecting to pricing…`);
+      setTimeout(() => navigate('/pricing'), 1500);
       return;
     }
     setCreating(true);
@@ -64,6 +66,10 @@ export default function Dashboard() {
   }
 
   async function handleDelete(id) {
+    if (plan === 'free') {
+      toast.error('❌ Deletion is disabled on the Free Trial. Upgrade to manage your projects.');
+      return;
+    }
     if (!window.confirm('Delete this project? This cannot be undone.')) return;
     try {
       await deleteProject(id);
@@ -95,7 +101,7 @@ export default function Dashboard() {
             </p>
           </div>
           <button
-            onClick={() => canCreate ? setShowCreate(true) : toast.error('Upgrade your plan to create more projects.')}
+            onClick={() => canCreate ? setShowCreate(true) : navigate('/pricing')}
             id="create-project-btn"
             className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 rounded-xl transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30"
           >
@@ -169,7 +175,7 @@ export default function Dashboard() {
               Create your first project and share the client link. Clients can upload files and leave feedback instantly.
             </p>
             <button
-              onClick={() => setShowCreate(true)}
+              onClick={() => canCreate ? setShowCreate(true) : navigate('/pricing')}
               id="empty-create-btn"
               className="flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-indigo-600 hover:from-indigo-700 hover:to-indigo-700 rounded-xl transition-all shadow-md"
             >
@@ -184,7 +190,7 @@ export default function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((project) => (
-              <ProjectCard key={project.id} project={project} onDelete={handleDelete} />
+              <ProjectCard key={project.id} project={project} onDelete={handleDelete} isFreePlan={plan === 'free'} />
             ))}
           </div>
         )}

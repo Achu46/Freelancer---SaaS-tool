@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   collection, doc, updateDoc, query, orderBy, onSnapshot,
@@ -10,9 +10,13 @@ import {
   Users, Shield, Crown, Zap, Search, LogOut, TrendingUp,
   CheckCircle2, XCircle, Clock, MoreVertical, RefreshCw,
   ChevronDown, FolderOpen, AlertTriangle, Star, Activity,
-  PieChart, BarChart3, ArrowUpRight, Menu, X, DollarSign,
+  PieChart as PieChartIcon, BarChart3, ArrowUpRight, Menu, X, DollarSign,
   Calendar, CreditCard,
 } from 'lucide-react';
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts';
 import toast from 'react-hot-toast';
 
 const PLAN_COLORS = {
@@ -185,6 +189,42 @@ export default function AdminPanel() {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  // ── Chart Data Preparation ───────────────────────────────────────
+  const chartData = useMemo(() => {
+    // 1. Group transactions by date for Revenue Chart
+    const revMap = {};
+    transactions.forEach((t) => {
+      const d = t.createdAt?.toDate?.()?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (d) revMap[d] = (revMap[d] || 0) + (t.amount || 0);
+    });
+    const revenueTrend = Object.entries(revMap).map(([name, amount]) => ({ name, amount })).reverse().slice(-7);
+
+    // 2. Group users by date for Growth Chart
+    const growthMap = {};
+    users.forEach((u) => {
+      const d = u.createdAt?.toDate?.()?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (d) growthMap[d] = (growthMap[d] || 0) + 1;
+    });
+    const userGrowth = Object.entries(growthMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a,b) => new Date(a.name) - new Date(b.name))
+      .slice(-7);
+
+    // 3. Plan distribution for Pie Chart
+    const plans = {
+      pro: users.filter(u => u.plan === 'pro').length,
+      starter: users.filter(u => u.plan === 'starter').length,
+      free: users.filter(u => u.plan === 'free').length,
+    };
+    const distribution = [
+      { name: 'Pro', value: plans.pro, color: '#6366f1' },
+      { name: 'Starter', value: plans.starter, color: '#818cf8' },
+      { name: 'Free', value: plans.free, color: '#94a3b8' },
+    ].filter(d => d.value > 0);
+
+    return { revenueTrend, userGrowth, distribution };
+  }, [users, transactions]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#020617] selection:bg-indigo-100 dark:selection:bg-indigo-500/30 overflow-x-hidden relative">
       {/* Dynamic Background Glows for Desktop */}
@@ -298,48 +338,117 @@ export default function AdminPanel() {
         <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
           <div className="flex items-center gap-2 mb-4 px-1">
             <Activity size={18} className="text-indigo-500" />
-            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-indigo-500">Analytics Status</h2>
+            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-indigo-500">Live Analytics</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Plan Distribution Chart-let */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Revenue Trend */}
+            <div className="lg:col-span-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
+               <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Financial Stream</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">Revenue Growth</p>
+                </div>
+                <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-sm bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <ArrowUpRight size={14} />
+                  <span>+12.5%</span>
+                </div>
+              </div>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData.revenueTrend}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.1} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                      itemStyle={{ color: '#818cf8' }}
+                    />
+                    <Area type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Plan Distribution */}
             <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Subscription Pulse</p>
                   <p className="text-lg font-bold text-slate-900 dark:text-white">Tier Distribution</p>
                 </div>
-                <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500">
-                  <PieChart size={20} />
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500">
+                  <PieChartIcon size={20} />
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                {[
-                  { label: 'Pro Tier', count: realUsers.filter(u => u.plan === 'pro').length, color: 'bg-indigo-500', icon: <Star size={12} /> },
-                  { label: 'Starter Tier', count: realUsers.filter(u => u.plan === 'starter').length, color: 'bg-indigo-500', icon: <Zap size={12} /> },
-                  { label: 'Free Tier', count: realUsers.filter(u => u.plan === 'free').length, color: 'bg-slate-400 dark:bg-slate-600', icon: <Clock size={12} /> },
-                ].map((tier) => (
-                  <div key={tier.label}>
-                    <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                        <span className={`w-2 h-2 rounded-full ${tier.color}`} />
-                        {tier.label}
-                      </div>
-                      <span className="text-slate-900 dark:text-white">{tier.count} users</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${tier.color} transition-all duration-1000 ease-out`} 
-                        style={{ width: `${(tier.count / (realUsers.length || 1)) * 100}%` }}
-                      />
-                    </div>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData.distribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {chartData.distribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {chartData.distribution.map((d) => (
+                  <div key={d.name} className="flex flex-col items-center">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">{d.name}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{d.value}</p>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Performance Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+            {/* User Growth Bar */}
+            <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Velocity</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">User Growth</p>
+                </div>
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
+                  <Activity size={18} />
+                </div>
+              </div>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData.userGrowth}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.1} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                      cursor={{fill: 'rgba(99, 102, 241, 0.05)'}}
+                    />
+                    <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Performance Metrics Quick View */}
             <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
                <div className="flex items-center justify-between mb-6">
                 <div>
@@ -373,11 +482,6 @@ export default function AdminPanel() {
                     <ArrowUpRight size={18} />
                     <span>+{(realUsers.length * 10).toFixed(0)}%</span>
                   </div>
-                </div>
-                <div className="h-10 w-24 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-lg relative overflow-hidden">
-                   <div className="absolute inset-0 flex items-center justify-around translate-y-2 opacity-50">
-                     {[4,7,3,9,5,8,6].map((h, i) => <div key={i} className="w-1 bg-emerald-500 rounded-full" style={{ height: `${h * 10}%` }} />)}
-                   </div>
                 </div>
               </div>
             </div>
