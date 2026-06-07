@@ -5,6 +5,8 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, IS_DEMO_MODE } from '../lib/firebase';
@@ -19,19 +21,49 @@ export function AuthProvider({ children }) {
   async function signup(email, password, displayName) {
     const result = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(result.user, { displayName });
-    // Create user document in Firestore with 'freelancer' role by default
-    await setDoc(doc(db, 'users', result.user.uid), {
+    
+    const defaultProfile = {
       email,
       displayName,
       role: 'freelancer', // Default role for all new signups
       plan: 'free',
       createdAt: serverTimestamp(),
-    });
+    };
+    // Create user document in Firestore
+    await setDoc(doc(db, 'users', result.user.uid), defaultProfile);
+    setUserProfile(defaultProfile);
     return result;
   }
 
   function login(email, password) {
     return signInWithEmailAndPassword(auth, email, password);
+  }
+
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const { user } = result;
+    
+    // Check if the user document already exists
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (!userDoc.exists()) {
+      const isAdmin = user.email === (import.meta.env.VITE_ADMIN_EMAIL || 'admin@queflow.com');
+      const defaultProfile = {
+        email: user.email,
+        displayName: user.displayName || 'Freelancer',
+        role: isAdmin ? 'admin' : 'freelancer',
+        plan: isAdmin ? 'pro' : 'free',
+        isAdmin: isAdmin ? true : false,
+        createdAt: serverTimestamp(),
+      };
+      await setDoc(userDocRef, defaultProfile);
+      setUserProfile(defaultProfile);
+    } else {
+      setUserProfile(userDoc.data());
+    }
+    return result;
   }
 
   function logout() {
@@ -61,7 +93,8 @@ export function AuthProvider({ children }) {
       setLoading(false);
     });
     return unsubscribe;
-  }, []);
+  }
+  , []);
 
   const value = {
     currentUser,
@@ -70,6 +103,7 @@ export function AuthProvider({ children }) {
     setUserProfile,
     signup,
     login,
+    loginWithGoogle,
     logout,
     loading,
     refetchProfile: () => currentUser && fetchUserProfile(currentUser.uid),
@@ -88,3 +122,4 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
+

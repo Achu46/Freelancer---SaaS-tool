@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  Plus, FolderOpen, Loader2, Search, Sparkles, Crown,
+  Plus, FolderOpen, Zap, Search, Sparkles, Crown,
   ArrowUpRight, CheckCircle2, TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [search, setSearch] = useState('');
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ clientName: '', clientEmail: '', description: '' });
+  const [deleteId, setDeleteId] = useState(null);
 
   const plan = userProfile?.plan || 'free';
   const planConfig = PLANS[plan];
@@ -63,13 +64,19 @@ export default function Dashboard() {
     }
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm('Delete this project? This cannot be undone.')) return;
+  function handleDelete(id) {
+    setDeleteId(id);
+  }
+
+  async function confirmDelete() {
+    if (!deleteId) return;
     try {
-      await deleteProject(id);
+      await deleteProject(deleteId);
       toast.success('Project deleted');
     } catch {
       toast.error('Failed to delete project');
+    } finally {
+      setDeleteId(null);
     }
   }
 
@@ -105,7 +112,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {stats.map((s) => (
             <div key={s.label} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
@@ -157,7 +164,7 @@ export default function Dashboard() {
         {/* Projects */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 size={32} className="text-indigo-500 animate-spin" />
+            <Zap size={32} className="text-indigo-500 thunder-loader" />
           </div>
         ) : projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -240,9 +247,33 @@ export default function Dashboard() {
             id="confirm-create-project"
             className="w-full py-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {creating ? <><Loader2 size={16} className="animate-spin" /> Creating…</> : 'Create Project'}
+            {creating ? <><Zap size={16} className="text-indigo-500 thunder-loader" /> Creating…</> : 'Create Project'}
           </button>
         </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Delete Project" size="sm">
+        <div className="space-y-4">
+          <p className="text-sm text-slate-655 dark:text-slate-400">
+            Are you sure you want to delete this project? This action cannot be undone and all workspace data, messages, and files will be permanently deleted.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <button
+              onClick={() => setDeleteId(null)}
+              className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDelete}
+              id="confirm-delete-btn"
+              className="px-4 py-2 text-sm font-semibold text-white bg-rose-650 hover:bg-rose-700 rounded-xl transition-all shadow-md shadow-rose-500/20"
+            >
+              Delete Project
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

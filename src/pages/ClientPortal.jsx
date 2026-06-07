@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import {
-  Upload, MessageSquare, CheckCircle2, Clock, Loader2,
+  Upload, MessageSquare, CheckCircle2, Clock,
   Zap, FileText, Image, File, Send, AlertCircle,
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
@@ -29,7 +29,7 @@ const STATUS_CONFIG = {
 
 const TASK_STATUS = {
   pending: { label: 'Pending', css: 'status-pending', icon: <Clock size={12} /> },
-  'in-progress': { label: 'In Progress', css: 'status-progress', icon: <Loader2 size={12} className="animate-spin" /> },
+  'in-progress': { label: 'In Progress', css: 'status-progress', icon: <Zap size={12} className="thunder-loader" /> },
   done: { label: 'Done', css: 'status-done', icon: <CheckCircle2 size={12} /> },
 };
 
@@ -72,11 +72,42 @@ export default function ClientPortal() {
   const { messages, sendMessage } = useMessages(project?.id);
   const { files, uploading, uploadProgress, uploadFile } = useFiles(project?.id);
 
+  useEffect(() => {
+    if (project && project.automations?.clientWelcome !== false) {
+      const shownKey = `welcome-shown-${project.id}`;
+      if (!sessionStorage.getItem(shownKey)) {
+        toast((t) => (
+          <div className="flex flex-col gap-2 p-1">
+            <span className="font-bold text-sm text-slate-200 flex items-center gap-1.5">
+              <Zap size={14} className="text-indigo-400" />
+              Secure Workspace Active
+            </span>
+            <span className="text-xs text-slate-400">
+              Welcome to your automated collaboration portal. You can view tasks in real-time, upload deliverables, and send feedback instantly.
+            </span>
+          </div>
+        ), {
+          duration: 6000,
+          position: 'top-right',
+          style: {
+            background: 'rgba(3, 7, 18, 0.9)',
+            border: '1px solid rgba(6, 182, 212, 0.25)',
+            color: '#fff',
+            borderRadius: '16px',
+            backdropFilter: 'blur(16px)',
+          }
+        });
+        sessionStorage.setItem(shownKey, 'true');
+      }
+    }
+  }, [project]);
+
   async function handleFileUpload(file) {
     await uploadFile(file, 'client');
 
-    // Notify freelancer
-    if (freelancer?.email) {
+    // Notify freelancer (if enabled in automations)
+    const isNotifyEnabled = project.automations ? project.automations.fileUploadAlert !== false : true;
+    if (freelancer?.email && isNotifyEnabled) {
       await notifyFreelancer({
         toEmail: freelancer.email,
         toName: freelancer.displayName || 'Freelancer',
@@ -97,8 +128,9 @@ export default function ClientPortal() {
     try {
       await sendMessage({ text: msgText.trim(), sender: 'client' });
 
-      // Notify freelancer
-      if (freelancer?.email) {
+      // Notify freelancer (if enabled in automations)
+      const isNotifyEnabled = project.automations ? project.automations.messageAlert !== false : true;
+      if (freelancer?.email && isNotifyEnabled) {
         await notifyFreelancer({
           toEmail: freelancer.email,
           toName: freelancer.displayName || 'Freelancer',
@@ -126,7 +158,7 @@ export default function ClientPortal() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <Loader2 size={36} className="text-indigo-500 animate-spin" />
+        <Zap size={36} className="text-indigo-500 thunder-loader" />
       </div>
     );
   }
@@ -174,13 +206,13 @@ export default function ClientPortal() {
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         {/* Tabs */}
-        <div className="flex gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-1.5 mb-6">
+        <div className="flex overflow-x-auto md:overflow-visible gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-1.5 mb-6">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               id={`portal-tab-${t.id}`}
-              className={`flex-1 py-2.5 text-sm font-medium rounded-xl transition-all ${
+              className={`flex-1 shrink-0 md:shrink py-2.5 px-4 md:px-2 text-sm font-medium rounded-xl transition-all ${
                 activeTab === t.id
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -213,7 +245,7 @@ export default function ClientPortal() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-6">
               <h2 className="font-semibold text-slate-900 dark:text-white mb-4">Tasks</h2>
               {tasksLoading ? (
-                <div className="flex justify-center py-6"><Loader2 className="animate-spin text-indigo-500" size={20} /></div>
+                <div className="flex justify-center py-6"><Zap className="thunder-loader text-indigo-500" size={20} /></div>
               ) : tasks.length === 0 ? (
                 <p className="text-sm text-slate-400 text-center py-4">No tasks added yet.</p>
               ) : (
@@ -345,10 +377,10 @@ export default function ClientPortal() {
                 type="submit"
                 disabled={sendingMsg || !msgText.trim()}
                 id="client-send-btn"
-                className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-11 h-11 flex items-center justify-center text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                title="Send message"
               >
-                <Send size={14} />
-                Send
+                {sendingMsg ? <Zap size={15} className="text-white thunder-loader" /> : <Send size={15} />}
               </button>
             </form>
           </div>

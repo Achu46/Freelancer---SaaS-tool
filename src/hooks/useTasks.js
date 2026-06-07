@@ -15,11 +15,16 @@ export function useTasks(projectId) {
     try {
       const q = query(
         collection(db, 'tasks'),
-        where('projectId', '==', projectId),
-        orderBy('createdAt', 'asc')
+        where('projectId', '==', projectId)
       );
       const snap = await getDocs(q);
-      setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => {
+        const tA = a.createdAt?.toMillis?.() || a.createdAt?.seconds * 1000 || 0;
+        const tB = b.createdAt?.toMillis?.() || b.createdAt?.seconds * 1000 || 0;
+        return tA - tB;
+      });
+      setTasks(list);
     } catch (err) {
       console.error('useTasks error:', err);
     } finally {

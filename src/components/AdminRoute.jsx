@@ -28,7 +28,7 @@ export default function AdminRoute({ children }) {
   const isAllowed = isAdminUser(currentUser, userProfile);
 
   if (!currentUser || !isAllowed) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;

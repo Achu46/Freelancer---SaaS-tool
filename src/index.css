@@ -1,9 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+@theme {
+  /* Remap indigo to user's custom navy and sky blue palette */
+  --color-indigo-50: #f0f6fa;
+  --color-indigo-100: #e1edf5;
+  --color-indigo-200: #c2daf0;
+  --color-indigo-300: #a8d0e6; /* Sky Blue */
+  --color-indigo-400: #6f8cb3;
+  --color-indigo-500: #374785; /* Slate Indigo */
+  --color-indigo-600: #2e3b6f;
+  --color-indigo-700: #24305e; /* Deep Navy */
+  --color-indigo-800: #1c264b;
+  --color-indigo-900: #151d38;
+  --color-indigo-950: #0c1122;
+
+  /* Remap violet to complement the custom navy/sky-blue palette */
+  --color-violet-50: #f4f8fa;
+  --color-violet-100: #e8f0f5;
+  --color-violet-200: #d0e0eb;
+  --color-violet-300: #b8cfe0;
+  --color-violet-400: #9cbcd6;
+  --color-violet-500: #a8d0e6; /* Sky Blue accent */
+  --color-violet-600: #8baec6;
+  --color-violet-700: #374785; /* Slate Indigo */
+  --color-violet-800: #24305e; /* Deep Navy */
+  --color-violet-900: #1c264b;
+  --color-violet-950: #0f142b;
+
+}
+
 @variant dark (&:where(.dark, .dark *));
-
-
 
 @layer base {
   *, *::before, *::after {
@@ -11,8 +38,13 @@
   }
 
   html {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Outfit', 'Inter', sans-serif;
     scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
@@ -21,42 +53,58 @@
   }
 
   .dark body {
-    @apply bg-slate-950 text-slate-100;
+    @apply bg-[#0e1322] text-slate-100;
   }
 }
 
-/* Glassmorphism utility */
+/* Cyber grid utility */
+.bg-grid {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(168, 208, 230, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(168, 208, 230, 0.04) 1px, transparent 1px);
+}
+
+/* Futuristic glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(55, 71, 133, 0.12);
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.6);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(18, 24, 46, 0.85);
+  border-color: rgba(168, 208, 230, 0.15);
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { @apply bg-transparent; }
-::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
-.dark ::-webkit-scrollbar-thumb { @apply bg-slate-700; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(12, 17, 34, 0.5); }
+::-webkit-scrollbar-thumb { background: rgba(168, 208, 230, 0.25); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(168, 208, 230, 0.45); }
 
-/* Gradient text */
+/* Glow Utilities */
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(168, 208, 230, 0.35);
+}
+.glow-purple {
+  box-shadow: 0 0 25px rgba(55, 71, 133, 0.25);
+}
+
+/* Neon Gradient Text */
 .gradient-text {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  background: linear-gradient(135deg, #a8d0e6 0%, #374785 50%, #24305e 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Animated gradient background */
+/* Animated futuristic background */
 .gradient-bg {
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  background: linear-gradient(135deg, #070a14, #0e1322, #1c2541, #0e1322);
   background-size: 400% 400%;
-  animation: gradientShift 8s ease infinite;
+  animation: gradientShift 10s ease infinite;
 }
 
 @keyframes gradientShift {
@@ -65,44 +113,113 @@
   100% { background-position: 0% 50%; }
 }
 
-/* Fade-in animation */
+/* Cyber card borders */
+.cyber-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(55, 71, 133, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-card:hover {
+  border-color: rgba(55, 71, 133, 0.35);
+  box-shadow: 0 0 30px rgba(55, 71, 133, 0.08);
+  transform: translateY(-2px);
+}
+
+.dark .cyber-card {
+  background: rgba(18, 24, 46, 0.65);
+  border-color: rgba(168, 208, 230, 0.08);
+}
+
+.dark .cyber-card:hover {
+  border-color: rgba(168, 208, 230, 0.3);
+  box-shadow: 0 0 30px rgba(168, 208, 230, 0.12);
+}
+
+/* Glowing Pulse dots */
+.glow-pulse {
+  position: relative;
+}
+.glow-pulse::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: inherit;
+  background-color: inherit;
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: -1;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Fade-in */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease forwards;
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Shine effect on cards */
-@keyframes shine {
-  from { left: -200%; }
-  to { left: 200%; }
+/* Status badges */
+.status-pending   { @apply bg-amber-50 text-amber-700 border border-amber-200/80; }
+.status-progress  { @apply bg-blue-50 text-blue-700 border border-blue-200/80; }
+.status-done      { @apply bg-emerald-50 text-emerald-700 border border-emerald-200/80; }
+.status-active    { @apply bg-cyan-50 text-cyan-700 border border-cyan-200/80; }
+.status-completed { @apply bg-slate-100 text-slate-700 border border-slate-200/80; }
+.status-paused    { @apply bg-rose-50 text-rose-700 border border-rose-200/80; }
+
+.dark .status-pending   { @apply bg-amber-950/40 text-amber-400 border border-amber-800/40; }
+.dark .status-progress  { @apply bg-blue-950/40 text-blue-400 border border-blue-800/40; }
+.dark .status-done      { @apply bg-emerald-950/40 text-emerald-400 border border-emerald-800/40; }
+.dark .status-active    { @apply bg-cyan-950/40 text-cyan-400 border border-cyan-800/40; }
+.dark .status-completed { @apply bg-slate-900 text-slate-400 border border-slate-700/60; }
+.dark .status-paused    { @apply bg-rose-950/40 text-rose-400 border border-rose-800/40; }
+
+/* Thunderbolt Loader */
+@keyframes thunderPulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    filter: drop-shadow(0 0 4px rgba(168, 208, 230, 0.4)) brightness(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.2) rotate(15deg);
+    filter: drop-shadow(0 0 16px rgba(168, 208, 230, 0.95)) brightness(1.4);
+    opacity: 1;
+  }
 }
 
-.card-shine::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -200%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.05), transparent);
-  animation: shine 3s ease-in-out infinite;
+.thunder-loader {
+  animation: thunderPulse 1s ease-in-out infinite;
 }
 
-/* Status badge colors */
-.status-pending   { @apply bg-amber-100 text-amber-700 border border-amber-200; }
-.status-progress  { @apply bg-blue-100 text-blue-700 border border-blue-200; }
-.status-done      { @apply bg-emerald-100 text-emerald-700 border border-emerald-200; }
-.status-active    { @apply bg-indigo-100 text-indigo-700 border border-indigo-200; }
-.status-completed { @apply bg-slate-100 text-slate-600 border border-slate-200; }
-.status-paused    { @apply bg-rose-100 text-rose-700 border border-rose-200; }
+/* Custom styled date picker input & native calendar overlay theme adjustment */
+input[type="date"] {
+  position: relative;
+}
 
-.dark .status-pending   { @apply bg-amber-900/30 text-amber-400 border-amber-800; }
-.dark .status-progress  { @apply bg-blue-900/30 text-blue-400 border-blue-800; }
-.dark .status-done      { @apply bg-emerald-900/30 text-emerald-400 border-emerald-800; }
-.dark .status-active    { @apply bg-indigo-900/30 text-indigo-400 border-indigo-800; }
-.dark .status-completed { @apply bg-slate-800 text-slate-400 border-slate-700; }
-.dark .status-paused    { @apply bg-rose-900/30 text-rose-400 border-rose-800; }
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 4px;
+  filter: invert(0.4) sepia(1) saturate(100%) hue-rotate(160deg);
+  transition: all 0.2s ease;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(1) saturate(500%) hue-rotate(160deg) brightness(1.2);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  background-color: rgba(168, 208, 230, 0.15);
+  filter: invert(0.8) sepia(1) saturate(1000%) hue-rotate(160deg) brightness(1.4);
+}

@@ -20,7 +20,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-slate-200 dark:border-indigo-500/10 bg-white/70 dark:bg-slate-950/60 backdrop-blur-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -34,26 +34,26 @@ export default function Navbar() {
           </Link>
 
           {/* Nav actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {currentUser ? (
               <>
                 <Link
                   to="/dashboard"
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap"
                 >
                   <LayoutDashboard size={15} />
                   Dashboard
                 </Link>
                 <Link
                   to="/pricing"
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap"
                 >
                   <DollarSign size={15} />
                   Pricing
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors whitespace-nowrap"
                   id="logout-btn"
                 >
                   <LogOut size={15} />
@@ -64,14 +64,14 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  className="px-2.5 py-1.5 sm:px-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors whitespace-nowrap"
                   id="nav-login-btn"
                 >
                   Log in
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-4 py-1.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
+                  className="px-3 py-1.5 sm:px-4 text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors whitespace-nowrap"
                   id="nav-signup-btn"
                 >
                   Get started
@@ -80,7 +80,7 @@ export default function Navbar() {
             )}
             <button
               onClick={toggleDark}
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 sm:p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
               id="dark-mode-toggle"
               aria-label="Toggle dark mode"
             >

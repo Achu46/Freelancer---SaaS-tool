@@ -6,7 +6,7 @@ export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('QueFlow-dark');
     if (saved !== null) return saved === 'true';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return true; // Default to dark mode for a premium futuristic feel
   });
 
   useEffect(() => {

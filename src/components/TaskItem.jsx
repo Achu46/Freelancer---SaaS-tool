@@ -1,4 +1,4 @@
-import { Check, Clock, Loader2, Trash2, ChevronDown } from 'lucide-react';
+import { Check, Clock, Zap, Trash2, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
 const STATUSES = ['pending', 'in-progress', 'done'];
@@ -13,6 +13,8 @@ export default function TaskItem({ task, onUpdate, onDelete, readOnly = false })
   const [open, setOpen] = useState(false);
 
   const cfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.pending;
+
+  const [isDeleting, setIsDeleting] = useState(false);
 
   function cycleStatus() {
     if (readOnly) return;
@@ -42,7 +44,7 @@ export default function TaskItem({ task, onUpdate, onDelete, readOnly = false })
         title={readOnly ? cfg.label : 'Click to cycle status'}
       >
         {task.status === 'done' && <Check size={12} className="text-white" />}
-        {task.status === 'in-progress' && <Loader2 size={10} className="text-white animate-spin" />}
+        {task.status === 'in-progress' && <Zap size={10} className="text-white thunder-loader" />}
       </button>
 
       {/* Title */}

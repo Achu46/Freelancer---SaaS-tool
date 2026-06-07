@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Copy, ExternalLink, Plus, Loader2,
+  ArrowLeft, Copy, ExternalLink, Plus, Send,
   FileText, Image, File, Download, MessageSquare,
   CheckSquare, Paperclip, Trash2, MoreVertical, Edit3,
-  Clock, CheckCircle2, RefreshCw,
+  Clock, CheckCircle2, RefreshCw, Zap, ToggleLeft, ToggleRight,
 } from 'lucide-react';
 import {
   collection, query, where, getDocs, doc, getDoc, updateDoc,
@@ -23,6 +23,7 @@ const TABS = [
   { id: 'tasks', label: 'Tasks', icon: <CheckSquare size={15} /> },
   { id: 'messages', label: 'Messages', icon: <MessageSquare size={15} /> },
   { id: 'files', label: 'Files', icon: <Paperclip size={15} /> },
+  { id: 'automations', label: 'Automations', icon: <Zap size={15} /> },
 ];
 
 function FileIcon({ type }) {
@@ -123,13 +124,41 @@ export default function ProjectDetail() {
     }
   }
 
+  async function toggleAutomationRule(ruleKey) {
+    if (!project) return;
+    const currentAutomations = project.automations || {
+      fileUploadAlert: true,
+      messageAlert: true,
+      taskCleanup: false,
+      clientWelcome: true,
+    };
+    const updatedAutomations = {
+      ...currentAutomations,
+      [ruleKey]: !currentAutomations[ruleKey]
+    };
+    
+    try {
+      await updateDoc(doc(db, 'projects', projectId), {
+        automations: updatedAutomations
+      });
+      setProject(prev => ({
+        ...prev,
+        automations: updatedAutomations
+      }));
+      toast.success('Automation rule updated');
+    } catch (err) {
+      console.error('Failed to update automation:', err);
+      toast.error('Failed to update automation rule');
+    }
+  }
+
   const STATUS_OPTIONS = ['active', 'completed', 'paused'];
   const STATUS_CSS = { active: 'status-active', completed: 'status-completed', paused: 'status-paused' };
 
   if (loadingProject) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <Loader2 className="text-indigo-500 animate-spin" size={32} />
+        <Zap className="text-indigo-500 thunder-loader" size={32} />
       </div>
     );
   }
@@ -210,13 +239,13 @@ export default function ProjectDetail() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-1.5 mb-6">
+        <div className="flex overflow-x-auto md:overflow-visible gap-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-1.5 mb-6">
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               id={`tab-${t.id}`}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-xl transition-all ${
+              className={`flex-1 shrink-0 md:shrink flex items-center justify-center gap-2 py-2.5 px-4 md:px-2 text-sm font-medium rounded-xl transition-all ${
                 tab === t.id
                   ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/30'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -262,7 +291,7 @@ export default function ProjectDetail() {
               </div>
 
               {tasksLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-indigo-500" size={24} /></div>
+                <div className="flex justify-center py-8"><Zap className="thunder-loader text-indigo-500" size={24} /></div>
               ) : tasks.length === 0 ? (
                 <div className="text-center py-12 text-slate-400 dark:text-slate-500">
                   <CheckSquare size={32} className="mx-auto mb-3 opacity-40" />
@@ -311,7 +340,7 @@ export default function ProjectDetail() {
 
               <div className="space-y-3 max-h-96 overflow-y-auto mb-5 pr-1">
                 {msgsLoading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="animate-spin text-indigo-500" size={24} /></div>
+                  <div className="flex justify-center py-8"><Zap className="thunder-loader text-indigo-500" size={24} /></div>
                 ) : messages.length === 0 ? (
                   <div className="text-center py-12 text-slate-400 dark:text-slate-500">
                     <MessageSquare size={32} className="mx-auto mb-3 opacity-40" />
@@ -352,9 +381,10 @@ export default function ProjectDetail() {
                   type="submit"
                   disabled={sendingMsg || !msgText.trim()}
                   id="send-msg-btn"
-                  className="px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-11 h-11 flex items-center justify-center text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                  title="Send message"
                 >
-                  {sendingMsg ? <Loader2 size={16} className="animate-spin" /> : 'Send'}
+                  {sendingMsg ? <Zap size={15} className="text-white thunder-loader" /> : <Send size={15} />}
                 </button>
               </form>
             </div>
@@ -366,7 +396,7 @@ export default function ProjectDetail() {
               <h2 className="text-base font-semibold text-slate-900 dark:text-white mb-5">Uploaded Files</h2>
 
               {filesLoading ? (
-                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-indigo-500" size={24} /></div>
+                <div className="flex justify-center py-8"><Zap className="thunder-loader text-indigo-500" size={24} /></div>
               ) : files.length === 0 ? (
                 <div className="text-center py-12 text-slate-400 dark:text-slate-500">
                   <Paperclip size={32} className="mx-auto mb-3 opacity-40" />
@@ -409,6 +439,93 @@ export default function ProjectDetail() {
               )}
             </div>
           )}
+
+          {/* Automations Tab */}
+          {tab === 'automations' && (
+            <div>
+              <div className="flex items-center gap-3 mb-6 border-b border-slate-800 pb-4">
+                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center glow-pulse">
+                  <Zap size={16} />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">Workspace Automations</h2>
+                  <p className="text-xs text-slate-450 dark:text-slate-400">Configure automated background tasks for this client workspace.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  {
+                    key: 'fileUploadAlert',
+                    title: 'Client Upload Instant Alerts',
+                    desc: 'Notify you via automated email notification the second a client uploads any assets/files.',
+                    icon: <Paperclip size={18} />,
+                    defaultVal: true,
+                  },
+                  {
+                    key: 'messageAlert',
+                    title: 'Real-Time Client Message Alerts',
+                    desc: 'Sends a direct email report when the client posts new workspace comments or requests.',
+                    icon: <MessageSquare size={18} />,
+                    defaultVal: true,
+                  },
+                  {
+                    key: 'clientWelcome',
+                    title: 'Automated Client Portal Welcome Message',
+                    desc: 'Automatically greet your client with an onboarding popup modal when they enter the portal.',
+                    icon: <Zap size={18} />,
+                    defaultVal: true,
+                  },
+                  {
+                    key: 'taskCleanup',
+                    title: 'Auto-Complete Audit Trail Logs',
+                    desc: 'Logs changes in task states and broadcasts progress to client timeline automatically.',
+                    icon: <CheckSquare size={18} />,
+                    defaultVal: false,
+                  }
+                ].map((rule) => {
+                  const isActive = project.automations ? !!project.automations[rule.key] : rule.defaultVal;
+                  return (
+                    <div
+                      key={rule.key}
+                      onClick={() => toggleAutomationRule(rule.key)}
+                      className={`p-5 rounded-2xl border transition-all duration-300 cursor-pointer select-none flex flex-col justify-between ${
+                        isActive 
+                          ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-500/40 shadow-lg shadow-indigo-500/5 hover:border-indigo-400' 
+                          : 'bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex gap-4">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                          isActive 
+                            ? 'bg-indigo-500/10 text-indigo-650 dark:text-indigo-400' 
+                            : 'bg-slate-105 dark:bg-slate-800 text-slate-500 dark:text-slate-500'
+                        }`}>
+                          {rule.icon}
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{rule.title}</p>
+                          <p className="text-xs text-slate-500 mt-1 leading-relaxed">{rule.desc}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/40">
+                        <span className={`text-[10px] font-extrabold uppercase tracking-widest mr-2 ${
+                          isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-500'
+                        }`}>
+                          {isActive ? 'Active' : 'Disabled'}
+                        </span>
+                        {isActive ? (
+                          <ToggleRight size={28} className="text-indigo-500" />
+                        ) : (
+                          <ToggleLeft size={28} className="text-slate-400 dark:text-slate-650" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
@@ -447,7 +564,7 @@ export default function ProjectDetail() {
             id="confirm-add-task"
             className="w-full py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {addingTask ? <><Loader2 size={16} className="animate-spin" />Adding…</> : 'Add Task'}
+            {addingTask ? <><Zap size={16} className="text-white thunder-loader" />Adding…</> : 'Add Task'}
           </button>
         </form>
       </Modal>
