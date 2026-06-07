@@ -27,7 +27,7 @@ function AppContent() {
         toastOptions={{
           duration: 3500,
           style: toastStyle,
-          success: { iconTheme: { primary: '#6366f1', secondary: '#fff' } },
+          success: { iconTheme: { primary: '#f59e0b', secondary: '#fff' } },
           error: { iconTheme: { primary: '#f43f5e', secondary: '#fff' } },
         }}
       />
@@ -82,10 +82,10 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           {IS_DEMO_MODE && (
-            <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-amber-950 text-center text-xs font-semibold py-2 px-4 shadow-md">
+            <div className="fixed top-0 left-0 right-0 z-50 bg-indigo-500 text-indigo-950 text-center text-xs font-semibold py-2 px-4 shadow-md">
               ⚠️ Demo Mode — Firebase credentials not configured. Copy{' '}
-              <code className="font-mono bg-amber-400 px-1 rounded">.env.example</code> to{' '}
-              <code className="font-mono bg-amber-400 px-1 rounded">.env</code>{' '}
+              <code className="font-mono bg-indigo-400 px-1 rounded">.env.example</code> to{' '}
+              <code className="font-mono bg-indigo-400 px-1 rounded">.env</code>{' '}
               and add your keys to enable full functionality.
             </div>
           )}

@@ -91,7 +91,7 @@ export default function Landing() {
             <Link
               to="/signup"
               id="hero-cta-signup"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 text-sm font-bold text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-650 hover:from-indigo-600 hover:to-violet-750 rounded-xl shadow-lg hover:shadow-indigo-500/20 transition-all duration-300 hover:-translate-y-0.5 glow-cyan active:scale-98 cursor-pointer"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 text-sm font-bold text-white bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-600 hover:to-indigo-750 rounded-xl shadow-lg hover:shadow-indigo-500/20 transition-all duration-300 hover:-translate-y-0.5 glow-cyan active:scale-98 cursor-pointer"
             >
               Initialize Workspaces Free
               <ArrowRight size={16} />
@@ -180,7 +180,7 @@ export default function Landing() {
               <div key={t.name} className="glass rounded-2xl p-6 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
                 <p className="text-xs text-slate-600 dark:text-slate-350 leading-relaxed italic mb-8">"{t.quote}"</p>
                 <div className="flex items-center gap-3.5 pt-4 border-t border-slate-100 dark:border-slate-800/40">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-650 flex items-center justify-center font-bold text-xs text-white shadow-md">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-md">
                     {t.avatar}
                   </div>
                   <div>
@@ -194,25 +194,47 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Call to action */}
-      <section className="py-24 border-t border-slate-200 dark:border-slate-900 bg-gradient-to-b from-slate-50 to-slate-100/30 dark:from-slate-950 dark:to-slate-900/20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-black text-slate-900 dark:text-white mb-6">
-            Scale your collaborative workflow today.
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 max-w-lg mx-auto mb-10 leading-relaxed">
-            Provision customized workspaces for your client accounts within minutes. 
-            Enjoy free access to core deliverables pipelines during sandbox setup.
-          </p>
-          <Link
-            to="/signup"
-            className="inline-flex items-center gap-2 px-8 py-4 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all duration-300 active:scale-98 cursor-pointer"
-          >
-            Create Your Corporate Account
-            <ArrowRight size={16} />
-          </Link>
+      {/* CTA Banner */}
+      <section className="py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#374785] to-[#24305e] p-10 text-center shadow-2xl shadow-indigo-500/30">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.1),_transparent)]" />
+            <div className="relative">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                Ready to streamline your client work?
+              </h2>
+              <p className="text-indigo-200 mb-8 text-lg">Join freelancers who've cut their email back-and-forth in half.</p>
+              <Link
+                to="/signup"
+                id="cta-bottom-signup"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#24305e] hover:text-[#374785] font-semibold rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
+              >
+                Get started free
+                <ChevronRight size={18} />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-10 border-t border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+              <Zap size={12} className="text-white" />
+            </div>
+            <span className="font-bold text-slate-700 dark:text-slate-300">
+              Que<span className="text-indigo-500">Flow</span>
+            </span>
+          </div>
+          <p className="text-sm text-slate-400">© 2025 QueFlow. All rights reserved.</p>
+          <div className="flex items-center gap-4 text-sm text-slate-400">
+            <Link to="/pricing" className="hover:text-indigo-500 transition-colors">Pricing</Link>
+            <Link to="/login" className="hover:text-indigo-500 transition-colors">Login</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

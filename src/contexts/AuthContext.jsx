@@ -69,6 +69,25 @@ export function AuthProvider({ children }) {
   function logout() {
     return signOut(auth);
   }
+  
+  async function loginWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    
+    // Check if profile exists
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (!snap.exists()) {
+      await setDoc(doc(db, 'users', user.uid), {
+        email: user.email,
+        displayName: user.displayName,
+        role: 'freelancer',
+        plan: 'free',
+        createdAt: serverTimestamp(),
+      });
+    }
+    return result;
+  }
 
   async function fetchUserProfile(uid) {
     const snap = await getDoc(doc(db, 'users', uid));

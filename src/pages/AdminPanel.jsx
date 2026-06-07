@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   collection, doc, updateDoc, query, orderBy, onSnapshot,
@@ -10,15 +10,19 @@ import {
   Users, Shield, Crown, Zap, Search, LogOut, TrendingUp,
   CheckCircle2, XCircle, Clock, MoreVertical, RefreshCw,
   ChevronDown, FolderOpen, AlertTriangle, Star, Activity,
-  PieChart, BarChart3, ArrowUpRight, Menu, X, DollarSign,
+  PieChart as PieChartIcon, BarChart3, ArrowUpRight, Menu, X, DollarSign,
   Calendar, CreditCard,
 } from 'lucide-react';
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts';
 import toast from 'react-hot-toast';
 
 const PLAN_COLORS = {
   free:    'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
   starter: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
-  pro:     'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
+  pro:     'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
 };
 
 const STATUS_COLORS = {
@@ -31,16 +35,16 @@ const PLANS = ['free', 'starter', 'pro'];
 function StatCard({ icon, label, value, sub, color = 'indigo' }) {
   const colors = {
     indigo:  'from-indigo-500/20 to-indigo-600/5 text-indigo-600 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20',
-    violet:  'from-violet-500/20 to-violet-600/5 text-violet-600 dark:text-violet-400 border-violet-200/50 dark:border-violet-500/20',
+    violet:  'from-indigo-500/20 to-indigo-600/5 text-indigo-600 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20',
     emerald: 'from-emerald-500/20 to-emerald-600/5 text-emerald-600 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-500/20',
-    amber:   'from-amber-500/20 to-amber-600/5 text-amber-600 dark:text-amber-400 border-amber-200/50 dark:border-amber-500/20',
+    amber:   'from-indigo-500/20 to-indigo-600/5 text-indigo-600 dark:text-indigo-400 border-indigo-200/50 dark:border-indigo-500/20',
   };
 
   const iconGradients = {
     indigo:  'from-indigo-500 to-indigo-600 shadow-indigo-500/20',
-    violet:  'from-violet-500 to-violet-600 shadow-violet-500/20',
+    violet:  'from-indigo-500 to-indigo-600 shadow-indigo-500/20',
     emerald: 'from-emerald-500 to-emerald-600 shadow-emerald-500/20',
-    amber:   'from-amber-500 to-amber-600 shadow-amber-500/20',
+    amber:   'from-indigo-500 to-indigo-600 shadow-indigo-500/20',
   };
 
   return (
@@ -185,19 +189,55 @@ export default function AdminPanel() {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  // ── Chart Data Preparation ───────────────────────────────────────
+  const chartData = useMemo(() => {
+    // 1. Group transactions by date for Revenue Chart
+    const revMap = {};
+    transactions.forEach((t) => {
+      const d = t.createdAt?.toDate?.()?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (d) revMap[d] = (revMap[d] || 0) + (t.amount || 0);
+    });
+    const revenueTrend = Object.entries(revMap).map(([name, amount]) => ({ name, amount })).reverse().slice(-7);
+
+    // 2. Group users by date for Growth Chart
+    const growthMap = {};
+    users.forEach((u) => {
+      const d = u.createdAt?.toDate?.()?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      if (d) growthMap[d] = (growthMap[d] || 0) + 1;
+    });
+    const userGrowth = Object.entries(growthMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a,b) => new Date(a.name) - new Date(b.name))
+      .slice(-7);
+
+    // 3. Plan distribution for Pie Chart
+    const plans = {
+      pro: users.filter(u => u.plan === 'pro').length,
+      starter: users.filter(u => u.plan === 'starter').length,
+      free: users.filter(u => u.plan === 'free').length,
+    };
+    const distribution = [
+      { name: 'Pro', value: plans.pro, color: '#6366f1' },
+      { name: 'Starter', value: plans.starter, color: '#818cf8' },
+      { name: 'Free', value: plans.free, color: '#94a3b8' },
+    ].filter(d => d.value > 0);
+
+    return { revenueTrend, userGrowth, distribution };
+  }, [users, transactions]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#020617] selection:bg-indigo-100 dark:selection:bg-indigo-500/30 overflow-x-hidden relative">
       {/* Dynamic Background Glows for Desktop */}
       <div className="hidden lg:block absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-violet-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
 
       {/* Admin Topbar */}
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-[#020617]/70 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
           <div className="flex items-center gap-3 group cursor-default">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:rotate-6 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:rotate-6 transition-transform">
               <Shield size={20} className="text-white" />
             </div>
             <div>
@@ -298,48 +338,117 @@ export default function AdminPanel() {
         <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
           <div className="flex items-center gap-2 mb-4 px-1">
             <Activity size={18} className="text-indigo-500" />
-            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-violet-500">Analytics Status</h2>
+            <h2 className="text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-widest bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-indigo-500">Live Analytics</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Plan Distribution Chart-let */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Revenue Trend */}
+            <div className="lg:col-span-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
+               <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Financial Stream</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">Revenue Growth</p>
+                </div>
+                <div className="flex items-center gap-1.5 text-emerald-500 font-bold text-sm bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <ArrowUpRight size={14} />
+                  <span>+12.5%</span>
+                </div>
+              </div>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData.revenueTrend}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.1} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                      itemStyle={{ color: '#818cf8' }}
+                    />
+                    <Area type="monotone" dataKey="amount" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Plan Distribution */}
             <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Subscription Pulse</p>
                   <p className="text-lg font-bold text-slate-900 dark:text-white">Tier Distribution</p>
                 </div>
-                <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500">
-                  <PieChart size={20} />
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500">
+                  <PieChartIcon size={20} />
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                {[
-                  { label: 'Pro Tier', count: realUsers.filter(u => u.plan === 'pro').length, color: 'bg-violet-500', icon: <Star size={12} /> },
-                  { label: 'Starter Tier', count: realUsers.filter(u => u.plan === 'starter').length, color: 'bg-indigo-500', icon: <Zap size={12} /> },
-                  { label: 'Free Tier', count: realUsers.filter(u => u.plan === 'free').length, color: 'bg-slate-400 dark:bg-slate-600', icon: <Clock size={12} /> },
-                ].map((tier) => (
-                  <div key={tier.label}>
-                    <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                        <span className={`w-2 h-2 rounded-full ${tier.color}`} />
-                        {tier.label}
-                      </div>
-                      <span className="text-slate-900 dark:text-white">{tier.count} users</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${tier.color} transition-all duration-1000 ease-out`} 
-                        style={{ width: `${(tier.count / (realUsers.length || 1)) * 100}%` }}
-                      />
-                    </div>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData.distribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {chartData.distribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {chartData.distribution.map((d) => (
+                  <div key={d.name} className="flex flex-col items-center">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase">{d.name}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">{d.value}</p>
                   </div>
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Performance Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+            {/* User Growth Bar */}
+            <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Velocity</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white">User Growth</p>
+                </div>
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
+                  <Activity size={18} />
+                </div>
+              </div>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData.userGrowth}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.1} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
+                    <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '12px', color: '#fff' }}
+                      cursor={{fill: 'rgba(99, 102, 241, 0.05)'}}
+                    />
+                    <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Performance Metrics Quick View */}
             <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden group">
                <div className="flex items-center justify-between mb-6">
                 <div>
@@ -373,11 +482,6 @@ export default function AdminPanel() {
                     <ArrowUpRight size={18} />
                     <span>+{(realUsers.length * 10).toFixed(0)}%</span>
                   </div>
-                </div>
-                <div className="h-10 w-24 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-lg relative overflow-hidden">
-                   <div className="absolute inset-0 flex items-center justify-around translate-y-2 opacity-50">
-                     {[4,7,3,9,5,8,6].map((h, i) => <div key={i} className="w-1 bg-emerald-500 rounded-full" style={{ height: `${h * 10}%` }} />)}
-                   </div>
                 </div>
               </div>
             </div>
@@ -438,7 +542,7 @@ export default function AdminPanel() {
                 {filtered.map((user) => (
                   <div key={user.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-sm relative group">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-lg font-extrabold shadow-md">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-lg font-extrabold shadow-md">
                         {(user.displayName || user.email || '?')[0].toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -536,7 +640,7 @@ export default function AdminPanel() {
                         <tr key={user.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-all">
                           <td className="px-8 py-5">
                             <div className="flex items-center gap-4">
-                              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-base font-extrabold shadow-md transform group-hover:scale-110 transition-transform">
+                              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white text-base font-extrabold shadow-md transform group-hover:scale-110 transition-transform">
                                 {(user.displayName || user.email || '?')[0].toUpperCase()}
                               </div>
                               <div>
@@ -583,7 +687,7 @@ export default function AdminPanel() {
                                             key={plan}
                                             onClick={() => changePlan(user.id, plan)}
                                             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                                              user.plan === plan ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                              user.plan === plan ? 'bg-indigo-500 text-slate-900 shadow-lg shadow-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                             }`}
                                           >
                                             <span className="capitalize">{plan} Profile</span>
@@ -651,7 +755,7 @@ export default function AdminPanel() {
                       </div>
                       <div className="text-right">
                         <p className="text-base font-black text-slate-900 dark:text-white">${parseFloat(tx.amount || 0).toFixed(2)}</p>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg uppercase ${tx.status === 'success' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30'}`}>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg uppercase ${tx.status === 'success' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30' : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30'}`}>
                           {tx.status || 'Processed'}
                         </span>
                       </div>
@@ -663,7 +767,7 @@ export default function AdminPanel() {
 
             {/* Quick Stats Helper */}
             <div className="space-y-4">
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20">
+              <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl shadow-indigo-500/20">
                 <p className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">Targeted Growth</p>
                 <p className="text-3xl font-black mb-1">${(mrr * 1.2).toFixed(2)}</p>
                 <p className="text-[10px] font-bold opacity-60">Projected 20% growth next cycle</p>
@@ -689,7 +793,7 @@ export default function AdminPanel() {
                    </div>
                    <div className="flex items-center justify-between">
                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Pro Plan</span>
-                     <span className="text-xs font-black text-violet-500">$9.99</span>
+                     <span className="text-xs font-black text-indigo-500">$9.99</span>
                    </div>
                  </div>
               </div>

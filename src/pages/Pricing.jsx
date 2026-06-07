@@ -10,12 +10,12 @@ const PLAN_KEYS = ['free', 'starter', 'pro'];
 const PLAN_ACCENTS = {
   free: 'border-slate-200 dark:border-slate-700',
   starter: 'border-indigo-400 dark:border-indigo-600 ring-2 ring-indigo-400/30 dark:ring-indigo-600/30',
-  pro: 'border-violet-400 dark:border-violet-600',
+  pro: 'border-indigo-600 dark:border-indigo-500 ring-2 ring-indigo-500/20',
 };
 
 const PLAN_BADGES = {
-  starter: { label: 'Most Popular', css: 'bg-indigo-600 text-white' },
-  pro: { label: 'Best Value', css: 'bg-violet-600 text-white' },
+  starter: { label: 'Most Popular', css: 'bg-indigo-600 text-white shadow-sm' },
+  pro: { label: 'Best Value', css: 'bg-indigo-600 text-white shadow-sm' },
 };
 
 export default function Pricing() {
@@ -125,7 +125,7 @@ export default function Pricing() {
                     className={`w-full py-3 text-sm font-semibold text-white rounded-xl transition-all flex items-center justify-center gap-2 ${
                       key === 'starter'
                         ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-md shadow-indigo-500/25'
-                        : 'bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 shadow-md shadow-violet-500/25'
+                        : 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 shadow-md shadow-indigo-500/25'
                     } disabled:opacity-60 disabled:cursor-not-allowed`}
                   >
                     {loadingPlan === key ? (

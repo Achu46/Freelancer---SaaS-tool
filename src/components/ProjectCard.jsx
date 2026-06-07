@@ -14,7 +14,7 @@ const STATUS_ICONS = {
   paused: <Clock size={12} />,
 };
 
-export default function ProjectCard({ project, onDelete, onStatusChange }) {
+export default function ProjectCard({ project, onDelete, onStatusChange, isFreePlan }) {
   const publicUrl = `${window.location.origin}/p/${project.publicLinkId}`;
 
   function copyLink() {
@@ -29,7 +29,7 @@ export default function ProjectCard({ project, onDelete, onStatusChange }) {
   return (
     <div className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-5 hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-200 overflow-hidden card-shine">
       {/* Glow accent */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] to-violet-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/[0.03] to-indigo-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
 
       <div className="relative">
         {/* Top row */}
@@ -80,11 +80,15 @@ export default function ProjectCard({ project, onDelete, onStatusChange }) {
           </button>
           <button
             onClick={() => onDelete(project.id)}
-            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
+            className={`p-2 rounded-lg transition-colors ${
+              isFreePlan 
+                ? 'text-slate-300 cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800' 
+                : 'text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20'
+            }`}
             id={`delete-project-${project.id}`}
-            title="Delete project"
+            title={isFreePlan ? 'Upgrade to delete projects' : 'Delete project'}
           >
-            <Trash2 size={15} />
+            {isFreePlan ? <Clock size={15} className="opacity-50" /> : <Trash2 size={15} />}
           </button>
         </div>
       </div>
