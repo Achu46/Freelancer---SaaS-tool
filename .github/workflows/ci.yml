@@ -28,4 +28,4 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx prisma validate --schema server/prisma/schema.prisma
+      - run: npm run prisma:validate
