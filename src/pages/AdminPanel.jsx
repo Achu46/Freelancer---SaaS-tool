@@ -111,6 +111,9 @@ export default function AdminPanel() {
     const unsubscribeProjects = onSnapshot(collection(db, 'projects'), (snapshot) => {
       const projectsData = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
       setProjects(projectsData);
+    }, (err) => {
+      console.error('Projects listener error:', err);
+      toast.error('Real-time sync failed for projects');
     });
 
     // Listen to Transactions (Live)
@@ -138,6 +141,7 @@ export default function AdminPanel() {
       setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, plan: newPlan } : u));
       toast.success(`Plan updated to ${newPlan}`);
     } catch (err) {
+      console.error('changePlan failed:', err);
       toast.error('Failed to update plan');
     } finally {
       setUpdatingId(null);
@@ -154,6 +158,7 @@ export default function AdminPanel() {
       setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, status: newStatus } : u));
       toast.success(`User ${newStatus === 'active' ? 'activated' : 'suspended'}`);
     } catch (err) {
+      console.error('toggleStatus failed:', err);
       toast.error('Failed to update status');
     } finally {
       setUpdatingId(null);
@@ -162,8 +167,13 @@ export default function AdminPanel() {
   }
 
   async function handleLogout() {
-    await signOut(auth);
-    navigate('/login'); // Fixed redirect to unified login
+    try {
+      await signOut(auth);
+      navigate('/login');
+    } catch (err) {
+      console.error('Logout failed:', err);
+      toast.error('Failed to log out');
+    }
   }
 
   // ── Derived stats ────────────────────────────────────────────────

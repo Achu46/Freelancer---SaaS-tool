@@ -20,7 +20,9 @@ export default function TaskItem({ task, onUpdate, onDelete, readOnly = false })
     if (readOnly) return;
     const idx = STATUSES.indexOf(task.status);
     const next = STATUSES[(idx + 1) % STATUSES.length];
-    onUpdate(task.id, { status: next });
+    Promise.resolve(onUpdate(task.id, { status: next })).catch((err) => {
+      console.error('Task status update failed:', err);
+    });
   }
 
   const dueDate = task.dueDate

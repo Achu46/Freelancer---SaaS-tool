@@ -70,29 +70,14 @@ export function AuthProvider({ children }) {
     return signOut(auth);
   }
   
-  async function loginWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    
-    // Check if profile exists
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (!snap.exists()) {
-      await setDoc(doc(db, 'users', user.uid), {
-        email: user.email,
-        displayName: user.displayName,
-        role: 'freelancer',
-        plan: 'free',
-        createdAt: serverTimestamp(),
-      });
-    }
-    return result;
-  }
-
   async function fetchUserProfile(uid) {
-    const snap = await getDoc(doc(db, 'users', uid));
-    if (snap.exists()) {
-      setUserProfile(snap.data());
+    try {
+      const snap = await getDoc(doc(db, 'users', uid));
+      if (snap.exists()) {
+        setUserProfile(snap.data());
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
     }
   }
 
@@ -103,17 +88,21 @@ export function AuthProvider({ children }) {
       return;
     }
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      if (user) {
-        await fetchUserProfile(user.uid);
-      } else {
-        setUserProfile(null);
+      try {
+        setCurrentUser(user);
+        if (user) {
+          await fetchUserProfile(user.uid);
+        } else {
+          setUserProfile(null);
+        }
+      } catch (err) {
+        console.error('Auth state change error:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return unsubscribe;
-  }
-  , []);
+  }, []);
 
   const value = {
     currentUser,

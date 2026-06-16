@@ -45,24 +45,39 @@ export function useTasks(projectId) {
   }, [fetchTasks]);
 
   async function addTask({ title, dueDate }) {
-    await addDoc(collection(db, 'tasks'), {
-      projectId,
-      title,
-      status: 'pending',
-      dueDate: dueDate || null,
-      createdAt: serverTimestamp(),
-    });
-    await fetchTasks();
+    try {
+      await addDoc(collection(db, 'tasks'), {
+        projectId,
+        title,
+        status: 'pending',
+        dueDate: dueDate || null,
+        createdAt: serverTimestamp(),
+      });
+      await fetchTasks();
+    } catch (err) {
+      console.error('addTask failed:', err);
+      throw err;
+    }
   }
 
   async function updateTask(taskId, data) {
-    await updateDoc(doc(db, 'tasks', taskId), data);
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...data } : t)));
+    try {
+      await updateDoc(doc(db, 'tasks', taskId), data);
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...data } : t)));
+    } catch (err) {
+      console.error('updateTask failed:', err);
+      throw err;
+    }
   }
 
   async function deleteTask(taskId) {
-    await deleteDoc(doc(db, 'tasks', taskId));
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    try {
+      await deleteDoc(doc(db, 'tasks', taskId));
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    } catch (err) {
+      console.error('deleteTask failed:', err);
+      throw err;
+    }
   }
 
   return { tasks, loading, addTask, updateTask, deleteTask, refetch: fetchTasks };

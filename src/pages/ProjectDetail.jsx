@@ -68,7 +68,8 @@ export default function ProjectDetail() {
           return;
         }
         setProject({ id: snap.id, ...snap.data() });
-      } catch {
+      } catch (err) {
+        console.error('Failed to load project:', err);
         navigate('/dashboard');
       } finally {
         setLoadingProject(false);
@@ -90,7 +91,8 @@ export default function ProjectDetail() {
       setProject((p) => ({ ...p, status }));
       setStatusOpen(false);
       toast.success('Status updated');
-    } catch {
+    } catch (err) {
+      console.error('changeStatus failed:', err);
       toast.error('Failed to update status');
     }
   }
@@ -103,7 +105,8 @@ export default function ProjectDetail() {
       setTaskForm({ title: '', dueDate: '' });
       setShowAddTask(false);
       toast.success('Task added');
-    } catch {
+    } catch (err) {
+      console.error('handleAddTask failed:', err);
       toast.error('Failed to add task');
     } finally {
       setAddingTask(false);
@@ -117,7 +120,8 @@ export default function ProjectDetail() {
     try {
       await sendMessage({ text: msgText.trim(), sender: 'freelancer' });
       setMsgText('');
-    } catch {
+    } catch (err) {
+      console.error('handleSendMsg failed:', err);
       toast.error('Failed to send message');
     } finally {
       setSendingMsg(false);
