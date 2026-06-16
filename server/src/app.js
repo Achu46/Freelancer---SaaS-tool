@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import { auditRequest } from './middleware/audit.js';
 import { authenticate } from './middleware/auth.js';
 import { resolveTenant } from './middleware/tenant.js';
+import { authRouter } from './modules/auth/auth.controller.js';
 import { appointmentRouter } from './modules/appointments/appointments.controller.js';
 import { billingRouter } from './modules/billing/billing.controller.js';
 import { clinicRouter } from './modules/clinics/clinics.controller.js';
@@ -24,6 +25,7 @@ export function createApp() {
     response.json({ status: 'ok', service: 'clinicos-api' });
   });
 
+  app.use('/api/auth', authRouter);
   app.use('/api', authenticate, resolveTenant, auditRequest);
   app.use('/api/clinics', clinicRouter);
   app.use('/api/patients', patientRouter);

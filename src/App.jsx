@@ -1,7 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import {
+  AccessDenied,
+  AuthPage,
   ClinicLanding,
   ClinicPanel,
   PatientPanel,
@@ -19,14 +21,65 @@ const queryClient = new QueryClient({
   },
 });
 
+const routeRoles = {
+  patient: ['PATIENT'],
+  clinic: ['SUPER_ADMIN', 'CLINIC_OWNER', 'DOCTOR', 'RECEPTIONIST'],
+  superAdmin: ['SUPER_ADMIN'],
+  architecture: ['SUPER_ADMIN', 'CLINIC_OWNER'],
+};
+
+function ProtectedRoute({ children, allowedRoles }) {
+  const session = useSelector((state) => state.clinicSession);
+
+  if (!session.isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!allowedRoles.includes(session.activeRole)) {
+    return <Navigate to="/access-denied" replace />;
+  }
+
+  return children;
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<ClinicLanding />} />
-      <Route path="/patient" element={<PatientPanel />} />
-      <Route path="/clinic" element={<ClinicPanel />} />
-      <Route path="/super-admin" element={<SuperAdminPanel />} />
-      <Route path="/architecture" element={<PlatformArchitecture />} />
+      <Route path="/login" element={<AuthPage />} />
+      <Route
+        path="/patient"
+        element={(
+          <ProtectedRoute allowedRoles={routeRoles.patient}>
+            <PatientPanel />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/clinic"
+        element={(
+          <ProtectedRoute allowedRoles={routeRoles.clinic}>
+            <ClinicPanel />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/super-admin"
+        element={(
+          <ProtectedRoute allowedRoles={routeRoles.superAdmin}>
+            <SuperAdminPanel />
+          </ProtectedRoute>
+        )}
+      />
+      <Route
+        path="/architecture"
+        element={(
+          <ProtectedRoute allowedRoles={routeRoles.architecture}>
+            <PlatformArchitecture />
+          </ProtectedRoute>
+        )}
+      />
+      <Route path="/access-denied" element={<AccessDenied />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -43,4 +96,3 @@ export default function App() {
     </QueryClientProvider>
   );
 }
-
