@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Copy, ExternalLink, Plus, Send,
-  FileText, Image, File, Download, MessageSquare,
-  CheckSquare, Paperclip, Trash2, MoreVertical, Edit3,
+  ArrowLeft, Copy, ExternalLink, Plus,
+  Download, MessageSquare,
+  CheckSquare, Paperclip, Trash2, MoreVertical,
   Clock, CheckCircle2, RefreshCw, Zap, ToggleLeft, ToggleRight,
 } from 'lucide-react';
 import {
@@ -17,6 +17,11 @@ import { useFiles } from '../hooks/useFiles';
 import TaskItem from '../components/TaskItem';
 import Modal from '../components/Modal';
 import Navbar from '../components/Navbar';
+import FileIcon from '../components/FileIcon';
+import MessageBubble from '../components/MessageBubble';
+import MessageForm from '../components/MessageForm';
+import { formatBytes } from '../utils/formatters';
+import { PROJECT_STATUSES, PROJECT_STATUS_CONFIG } from '../utils/statusConfig';
 import toast from 'react-hot-toast';
 
 const TABS = [
@@ -26,18 +31,7 @@ const TABS = [
   { id: 'automations', label: 'Automations', icon: <Zap size={15} /> },
 ];
 
-function FileIcon({ type }) {
-  if (type?.startsWith('image/')) return <Image size={16} className="text-indigo-500" />;
-  if (type === 'application/pdf') return <FileText size={16} className="text-rose-500" />;
-  return <File size={16} className="text-slate-400" />;
-}
 
-function formatBytes(bytes) {
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 export default function ProjectDetail() {
   const { projectId } = useParams();
@@ -152,8 +146,8 @@ export default function ProjectDetail() {
     }
   }
 
-  const STATUS_OPTIONS = ['active', 'completed', 'paused'];
-  const STATUS_CSS = { active: 'status-active', completed: 'status-completed', paused: 'status-paused' };
+  const STATUS_OPTIONS = PROJECT_STATUSES;
+  const STATUS_CSS = Object.fromEntries(PROJECT_STATUSES.map(s => [s, PROJECT_STATUS_CONFIG[s].css]));
 
   if (loadingProject) {
     return (
@@ -347,46 +341,26 @@ export default function ProjectDetail() {
                     <p className="text-sm">No messages yet.</p>
                   </div>
                 ) : (
-                  messages.map((msg) => {
-                    const isFreelancer = msg.sender === 'freelancer';
-                    const ts = msg.timestamp?.toDate?.()?.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                    return (
-                      <div key={msg.id} className={`flex ${isFreelancer ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-xs sm:max-w-sm rounded-2xl px-4 py-2.5 ${
-                          isFreelancer
-                            ? 'bg-indigo-500 text-slate-900 rounded-br-sm'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-sm'
-                        }`}>
-                          <p className="text-sm leading-relaxed">{msg.text}</p>
-                          <p className={`text-xs mt-1 ${isFreelancer ? 'text-indigo-200' : 'text-slate-400'}`}>
-                            {isFreelancer ? 'You' : 'Client'} · {ts}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
+                  messages.map((msg) => (
+                    <MessageBubble
+                      key={msg.id}
+                      message={msg}
+                      isOwnMessage={msg.sender === 'freelancer'}
+                      ownLabel="You"
+                      otherLabel="Client"
+                    />
+                  ))
                 )}
               </div>
 
-              <form onSubmit={handleSendMsg} className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Type a message…"
-                  value={msgText}
-                  onChange={(e) => setMsgText(e.target.value)}
-                  id="send-message-input"
-                  className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
-                />
-                <button
-                  type="submit"
-                  disabled={sendingMsg || !msgText.trim()}
-                  id="send-msg-btn"
-                  className="w-11 h-11 flex items-center justify-center text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                  title="Send message"
-                >
-                  {sendingMsg ? <Zap size={15} className="text-white thunder-loader" /> : <Send size={15} />}
-                </button>
-              </form>
+              <MessageForm
+                msgText={msgText}
+                setMsgText={setMsgText}
+                onSubmit={handleSendMsg}
+                sending={sendingMsg}
+                inputId="send-message-input"
+                buttonId="send-msg-btn"
+              />
             </div>
           )}
 

@@ -18,6 +18,8 @@ import {
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
 import toast from 'react-hot-toast';
+import { mapDocs } from '../utils/firestoreHelpers';
+import { formatDate } from '../utils/formatters';
 
 const PLAN_COLORS = {
   free:    'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
@@ -90,10 +92,9 @@ export default function AdminPanel() {
     
     // Listen to Users (Live) - Simple query to avoid index/missing field issues
     const unsubscribeUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
-      const usersData = snapshot.docs.map((d) => ({
-        id: d.id,
-        ...d.data(),
-        status: d.data().status || 'active',
+      const usersData = mapDocs(snapshot).map((u) => ({
+        ...u,
+        status: u.status || 'active',
       })).sort((a, b) => {
         // Sort in memory safely
         const dateA = a.createdAt?.toDate?.() || new Date(0);
@@ -109,13 +110,13 @@ export default function AdminPanel() {
 
     // Listen to Projects (Live)
     const unsubscribeProjects = onSnapshot(collection(db, 'projects'), (snapshot) => {
-      const projectsData = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const projectsData = mapDocs(snapshot);
       setProjects(projectsData);
     });
 
     // Listen to Transactions (Live)
     const unsubscribeTransactions = onSnapshot(query(collection(db, 'transactions'), orderBy('createdAt', 'desc')), (snapshot) => {
-      const transData = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const transData = mapDocs(snapshot);
       setTransactions(transData);
     }, (err) => {
       console.warn('Transactions listener error (likely empty/no permission):', err);
@@ -182,12 +183,6 @@ export default function AdminPanel() {
   });
 
   const projectCountFor = (uid) => projects.filter((p) => p.userId === uid).length;
-
-  const formatDate = (ts) => {
-    const d = ts?.toDate?.();
-    if (!d) return '—';
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
 
   // ── Chart Data Preparation ───────────────────────────────────────
   const chartData = useMemo(() => {

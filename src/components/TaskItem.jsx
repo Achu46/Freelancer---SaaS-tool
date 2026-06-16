@@ -1,25 +1,18 @@
 import { Check, Clock, Zap, Trash2, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-
-const STATUSES = ['pending', 'in-progress', 'done'];
-
-const STATUS_CONFIG = {
-  pending: { label: 'Pending', css: 'status-pending' },
-  'in-progress': { label: 'In Progress', css: 'status-progress' },
-  done: { label: 'Done', css: 'status-done' },
-};
+import { TASK_STATUSES, TASK_STATUS_CONFIG } from '../utils/statusConfig';
 
 export default function TaskItem({ task, onUpdate, onDelete, readOnly = false }) {
   const [open, setOpen] = useState(false);
 
-  const cfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.pending;
+  const cfg = TASK_STATUS_CONFIG[task.status] || TASK_STATUS_CONFIG.pending;
 
   const [isDeleting, setIsDeleting] = useState(false);
 
   function cycleStatus() {
     if (readOnly) return;
-    const idx = STATUSES.indexOf(task.status);
-    const next = STATUSES[(idx + 1) % STATUSES.length];
+    const idx = TASK_STATUSES.indexOf(task.status);
+    const next = TASK_STATUSES[(idx + 1) % TASK_STATUSES.length];
     onUpdate(task.id, { status: next });
   }
 

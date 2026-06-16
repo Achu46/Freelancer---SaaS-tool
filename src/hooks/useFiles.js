@@ -8,6 +8,7 @@ import {
   ref, uploadBytesResumable, getDownloadURL,
 } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
+import { mapDocs } from '../utils/firestoreHelpers';
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB (increased with compression)
 
@@ -28,7 +29,7 @@ export function useFiles(projectId) {
         orderBy('timestamp', 'desc')
       );
       const snap = await getDocs(q);
-      setFiles(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      setFiles(mapDocs(snap));
     } catch (err) {
       console.error('useFiles error:', err);
     } finally {

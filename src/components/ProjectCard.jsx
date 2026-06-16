@@ -1,12 +1,7 @@
 import { ExternalLink, Copy, Trash2, Users, CheckCircle2, Clock, MoreVertical, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-
-const STATUS_STYLES = {
-  active: 'status-active',
-  completed: 'status-completed',
-  paused: 'status-paused',
-};
+import { PROJECT_STATUS_CONFIG } from '../utils/statusConfig';
 
 const STATUS_ICONS = {
   active: <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 inline-block" />,
@@ -43,7 +38,7 @@ export default function ProjectCard({ project, onDelete, onStatusChange, isFreeP
             </Link>
             <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{project.clientEmail}</p>
           </div>
-          <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${STATUS_STYLES[project.status] || 'status-active'}`}>
+          <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${PROJECT_STATUS_CONFIG[project.status]?.css || 'status-active'}`}>
             {STATUS_ICONS[project.status]}
             {project.status}
           </span>

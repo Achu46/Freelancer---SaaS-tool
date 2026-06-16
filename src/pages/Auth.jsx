@@ -7,8 +7,8 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '../lib/firebase';
 import { isAdminUser } from '../components/AdminRoute';
+import { ADMIN_EMAIL } from '../utils/constants';
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@queflow.com';
 const ADMIN_PASS  = import.meta.env.VITE_ADMIN_PASSWORD || '12345678';
 
 export default function Auth({ mode = 'login' }) {
@@ -128,28 +128,6 @@ export default function Auth({ mode = 'login' }) {
         err.code === 'auth/invalid-email' ? 'Invalid email address.' :
         'Something went wrong. Please try again.';
       toast.error(msg);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleGoogleLogin() {
-    setLoading(true);
-    try {
-      const result = await loginWithGoogle();
-      toast.success(`Welcome, ${result.user.displayName}!`);
-      
-      // Fetch profile to check role
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      const role = userDoc.data()?.role || 'freelancer';
-      
-      if (role === 'admin') navigate('/admin');
-      else navigate('/dashboard');
-    } catch (err) {
-      console.error('Google auth error:', err);
-      if (err.code !== 'auth/popup-closed-by-user') {
-        toast.error('Failed to sign in with Google. Please try again.');
-      }
     } finally {
       setLoading(false);
     }
@@ -344,7 +322,7 @@ export default function Auth({ mode = 'login' }) {
           </div>
 
           <button
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleSignIn}
             disabled={loading}
             className="w-full py-2.5 text-sm font-semibold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2.5 active:scale-[0.98]"
           >
