@@ -1,96 +1,92 @@
-# QueFlow 🌊 — Premium Freelancer Client Portal
+# ClinicOS — Multi-Tenant Clinic Management SaaS
 
-QueFlow is a production-ready Micro-SaaS designed for freelancers who want to eliminate the chaos of "email tag." Give every client a single, secure, no-login portal link where they can upload files, track tasks, and message you in real-time.
+ClinicOS is a production-oriented full-stack SaaS blueprint for clinics, doctors, reception teams, patients, and platform administrators. It is structured around strict tenant isolation, RBAC, subscription plans, appointment operations, queue management, EMR, prescriptions, billing, payments, notifications, analytics, support, and audit logging.
 
-![QueFlow Dashboard](https://via.placeholder.com/1200x600?text=QueFlow+Client+Portal+Preview)
+## Product surfaces
 
-## 🚀 Key Features
+- **Patient Panel**: appointment booking, medical records, prescriptions, lab reports, invoices, family members, notifications, and support tickets.
+- **Clinic Panel**: doctors, staff, patients, appointments, queue, calendar, billing, payments, prescriptions, medical records, reports, analytics, subscription, and support.
+- **Super Admin Panel**: clinics, plans, subscriptions, platform revenue, payments, audit logs, users, support, system settings, and feature flags.
 
-- **One-Link Portals**: Clients access their dedicated space via a secure public link. No signup required for clients.
-- **Role-Based Access (RBAC)**: Unified login for both Freelancers (Dashboard) and Admins (System Oversight).
-- **Task Management**: Real-time task tracking with status updates.
-- **File Exchange**: Secure file uploads and management via Firebase Storage.
-- **Messaging**: Integrated project communication.
-- **Premium Subscriptions**: Integrated Lemon Squeezy checkout for Starter and Pro plans.
+## Tech stack
 
-## 🛠️ Tech Stack
+- **Frontend**: React, Vite, Tailwind CSS, React Router, TanStack Query, Redux Toolkit, Axios, Recharts
+- **API**: Node.js, Express, JWT-ready middleware, Zod DTO validation
+- **Database**: PostgreSQL with Prisma schema
+- **Cache/queues**: Redis-ready service layer
+- **Payments**: Razorpay-ready billing routes
+- **Storage**: S3/R2-ready document architecture
+- **Deployment**: Docker, Docker Compose, Nginx, GitHub Actions
 
-- **Frontend**: React 19 + Vite
-- **Styling**: Tailwind CSS v4 (Modern & High-Performance)
-- **Backend**: Firebase (Auth, Firestore, Storage)
-- **Payments**: Lemon Squeezy (Subscriptions & SaaS Billing)
-- **Notifications**: EmailJS (System & User Alerts)
+## Quick start
 
----
-
-## ⚡ Quick Start
-
-### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/your-username/queflow.git
-cd queflow
 npm install
-```
-
-### 2. Configure Environment
-Copy `.env.example` to `.env` and fill in your credentials:
-```bash
-cp .env.example .env
-```
-
-| Variable | Source |
-|---|---|
-| `VITE_FIREBASE_*` | Firebase Console → Project Settings |
-| `VITE_LS_STARTER_CHECKOUT_URL` | Lemon Squeezy → Products → Starter Plan |
-| `VITE_LS_PRO_CHECKOUT_URL` | Lemon Squeezy → Products → Pro Plan |
-| `VITE_EMAILJS_*` | EmailJS Dashboard → Services / Templates |
-
-### 3. Run Development Server
-```bash
 npm run dev
 ```
 
----
+Open the web app and navigate between:
 
-## 🏗️ Firebase Setup
+- `/` — platform overview
+- `/patient` — patient panel
+- `/clinic` — clinic operations panel
+- `/super-admin` — platform admin panel
+- `/architecture` — RBAC, tenant isolation, and backend architecture
 
-1. **Authentication**: Enable **Email/Password** in the Firebase Console.
-2. **Firestore**: Create a database in **Production Mode**.
-   - Deploy rules: `firebase deploy --only firestore:rules`
-3. **Storage**: Enable Storage and deploy rules: `firebase deploy --only storage`.
+## API scaffold
 
-## 🍋 Lemon Squeezy Setup
-
-1. Create a **Starter** and **Pro** product in your Lemon Squeezy dashboard.
-2. Copy the **Checkout Links** for each product to your `.env` file.
-3. Configure **Webhooks** if you are using server-side listeners (optional for this frontend-focused version).
-
----
-
-## 📁 Project Structure
-
-```text
-src/
-├── components/      # UI components & AdminRoute guards
-├── contexts/        # Auth & Role-based context
-├── hooks/           # useProjects, useTasks, useMessages, useFiles
-├── lib/             # Firebase, Lemon Squeezy, EmailJS configs
-└── pages/           # Landing, Auth, Dashboard, AdminPanel, ClientPortal
+```bash
+node server/src/index.js
 ```
 
----
+The API exposes:
 
-## 🎯 Admin Access
+- `GET /health`
+- `GET /api/clinics/me`
+- `GET|POST /api/patients`
+- `GET|POST /api/appointments`
+- `GET|POST /api/billing/invoices`
+- `POST /api/billing/invoices/:invoiceId/razorpay-order`
+- `GET /api/subscriptions/plans`
+- `GET|POST /api/notifications`
 
-To access the sophisticated **Admin Panel** (`/admin`):
-1. Set `VITE_ADMIN_EMAIL` and `VITE_ADMIN_PASSWORD` in your `.env`.
-2. Login through the unified `/login` page with these credentials.
-3. You will be automatically redirected to the system oversight dashboard.
+Local demo requests may use `X-Clinic-Id`, `X-Demo-Role`, and `X-Plan` headers. Production deployments should provide JWT access tokens and rotate refresh tokens.
 
----
+## Prisma
 
-## 📄 License
+Validate the schema:
 
-This project is open-source and available under the **MIT License**.
+```bash
+npx prisma validate --schema server/prisma/schema.prisma
+```
 
-Built with ❤️ for Freelancers.
+The schema includes clinic, user, role, permission, doctor, staff, patient, family member, appointment, appointment slot, queue token, prescription, medical record, lab report, invoice, payment, subscription, notifications, audit logs, support tickets, refresh tokens, activity logs, follow-ups, and settings.
+
+## Docker
+
+```bash
+docker compose up --build
+```
+
+Services:
+
+- `web` — Vite build served by Nginx
+- `api` — Express API
+- `postgres` — PostgreSQL
+- `redis` — Redis
+
+## Tenant isolation model
+
+- Every business entity carries `clinicId`.
+- `resolveTenant` creates tenant context from JWT/header data.
+- Repositories inject `clinicId` filters before data access.
+- RBAC guards enforce role permission checks per route.
+- Super admin workflows redact PHI by default and rely on audit trails.
+
+## Validation
+
+```bash
+npm run lint
+npm run build
+npx prisma validate --schema server/prisma/schema.prisma
+```
