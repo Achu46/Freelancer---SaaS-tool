@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, IS_DEMO_MODE } from '../lib/firebase';
+import { ADMIN_EMAIL } from '../utils/constants';
 
 const AuthContext = createContext(null);
 
@@ -43,13 +44,12 @@ export function AuthProvider({ children }) {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
     const { user } = result;
-    
-    // Check if the user document already exists
+
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
-    
+
     if (!userDoc.exists()) {
-      const isAdmin = user.email === (import.meta.env.VITE_ADMIN_EMAIL || 'admin@queflow.com');
+      const isAdmin = user.email === ADMIN_EMAIL;
       const defaultProfile = {
         email: user.email,
         displayName: user.displayName || 'Freelancer',
@@ -68,25 +68,6 @@ export function AuthProvider({ children }) {
 
   function logout() {
     return signOut(auth);
-  }
-  
-  async function loginWithGoogle() {
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    
-    // Check if profile exists
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (!snap.exists()) {
-      await setDoc(doc(db, 'users', user.uid), {
-        email: user.email,
-        displayName: user.displayName,
-        role: 'freelancer',
-        plan: 'free',
-        createdAt: serverTimestamp(),
-      });
-    }
-    return result;
   }
 
   async function fetchUserProfile(uid) {

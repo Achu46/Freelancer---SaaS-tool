@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 import { db } from '../lib/firebase';
+import { mapDocs, sortByTimestamp } from '../utils/firestoreHelpers';
 import { useAuth } from '../contexts/AuthContext';
 
 export function useProjects() {
@@ -31,13 +32,8 @@ export function useProjects() {
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        // Sort client-side by createdAt descending (avoids index requirement)
-        data.sort((a, b) => {
-          const aTime = a.createdAt?.toMillis?.() ?? 0;
-          const bTime = b.createdAt?.toMillis?.() ?? 0;
-          return bTime - aTime;
-        });
+        const data = mapDocs(snap);
+        sortByTimestamp(data, 'createdAt', 'desc');
         setProjects(data);
         setLoading(false);
       },

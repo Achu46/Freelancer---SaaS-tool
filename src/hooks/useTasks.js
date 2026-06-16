@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  collection, query, where, orderBy, getDocs,
+  collection, query, where, getDocs,
   addDoc, updateDoc, deleteDoc, doc, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { mapDocs, sortByTimestamp } from '../utils/firestoreHelpers';
 
 export function useTasks(projectId) {
   const [tasks, setTasks] = useState([]);
@@ -18,12 +19,8 @@ export function useTasks(projectId) {
         where('projectId', '==', projectId)
       );
       const snap = await getDocs(q);
-      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      list.sort((a, b) => {
-        const tA = a.createdAt?.toMillis?.() || a.createdAt?.seconds * 1000 || 0;
-        const tB = b.createdAt?.toMillis?.() || b.createdAt?.seconds * 1000 || 0;
-        return tA - tB;
-      });
+      const list = mapDocs(snap);
+      sortByTimestamp(list, 'createdAt', 'asc');
       setTasks(list);
     } catch (err) {
       console.error('useTasks error:', err);

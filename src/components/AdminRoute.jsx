@@ -1,7 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@queflow.com';
+import { ADMIN_EMAIL } from '../utils/constants';
 
 export function isAdminUser(user, profile) {
   // Use the database role as the primary source of truth

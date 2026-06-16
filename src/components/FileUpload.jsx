@@ -1,12 +1,7 @@
 import { useRef, useState } from 'react';
-import { Upload, X, FileText, Image, File } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
-
-function getFileIcon(type) {
-  if (type?.startsWith('image/')) return <Image size={18} className="text-indigo-500" />;
-  if (type === 'application/pdf') return <FileText size={18} className="text-rose-500" />;
-  return <File size={18} className="text-slate-400" />;
-}
+import FileIcon from './FileIcon';
 
 export default function FileUpload({ onUpload, uploading, isCompressing, uploadProgress }) {
   const inputRef = useRef(null);
@@ -66,7 +61,7 @@ export default function FileUpload({ onUpload, uploading, isCompressing, uploadP
 
         {selectedFile ? (
           <div className="flex items-center gap-3 justify-center">
-            {getFileIcon(selectedFile.type)}
+            <FileIcon type={selectedFile.type} size={18} />
             <div className="text-left">
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{selectedFile.name}</p>
               <p className="text-xs text-slate-400">{(selectedFile.size / 1024).toFixed(1)} KB</p>

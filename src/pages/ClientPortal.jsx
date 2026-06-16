@@ -5,33 +5,21 @@ import {
 } from 'firebase/firestore';
 import { db, IS_DEMO_MODE } from '../lib/firebase';
 import {
-  Upload, MessageSquare, CheckCircle2, Clock,
-  Zap, FileText, Image, File, Send, AlertCircle,
+  Upload, MessageSquare,
+  Zap, AlertCircle,
 } from 'lucide-react';
 import { useTasks } from '../hooks/useTasks';
 import { useMessages } from '../hooks/useMessages';
 import { useFiles } from '../hooks/useFiles';
 import FileUpload from '../components/FileUpload';
+import FileIcon from '../components/FileIcon';
+import MessageBubble from '../components/MessageBubble';
+import MessageForm from '../components/MessageForm';
 import { notifyFreelancer } from '../lib/emailjs';
+import { PROJECT_STATUS_CONFIG, TASK_STATUS_CONFIG } from '../utils/statusConfig';
 import toast, { Toaster } from 'react-hot-toast';
 
-function FileIcon({ type }) {
-  if (type?.startsWith('image/')) return <Image size={15} className="text-indigo-500" />;
-  if (type === 'application/pdf') return <FileText size={15} className="text-rose-500" />;
-  return <File size={15} className="text-slate-400" />;
-}
 
-const STATUS_CONFIG = {
-  active: { label: 'Active', css: 'status-active' },
-  completed: { label: 'Completed', css: 'status-completed' },
-  paused: { label: 'Paused', css: 'status-paused' },
-};
-
-const TASK_STATUS = {
-  pending: { label: 'Pending', css: 'status-pending', icon: <Clock size={12} /> },
-  'in-progress': { label: 'In Progress', css: 'status-progress', icon: <Zap size={12} className="thunder-loader" /> },
-  done: { label: 'Done', css: 'status-done', icon: <CheckCircle2 size={12} /> },
-};
 
 const DEMO_PROJECT = {
   id: 'demo-project-id',
@@ -188,7 +176,7 @@ export default function ClientPortal() {
     }
   }
 
-  const statusCfg = STATUS_CONFIG[project?.status] || STATUS_CONFIG.active;
+  const statusCfg = PROJECT_STATUS_CONFIG[project?.status] || PROJECT_STATUS_CONFIG.active;
   const doneCount = tasks.filter((t) => t.status === 'done').length;
   const progress = tasks.length ? Math.round((doneCount / tasks.length) * 100) : 0;
 
@@ -288,7 +276,7 @@ export default function ClientPortal() {
               ) : (
                 <div className="space-y-2">
                   {tasks.map((task) => {
-                    const cfg = TASK_STATUS[task.status] || TASK_STATUS.pending;
+                    const cfg = TASK_STATUS_CONFIG[task.status] || TASK_STATUS_CONFIG.pending;
                     const due = task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
                     return (
                       <div key={task.id} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
@@ -385,46 +373,27 @@ export default function ClientPortal() {
                   <p className="text-sm">No messages yet. Say hello!</p>
                 </div>
               ) : (
-                messages.map((msg) => {
-                  const isClient = msg.sender === 'client';
-                  const ts = msg.timestamp?.toDate?.()?.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                  return (
-                    <div key={msg.id} className={`flex ${isClient ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs sm:max-w-sm rounded-2xl px-4 py-2.5 ${
-                        isClient
-                          ? 'bg-indigo-500 text-slate-900 rounded-br-sm'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-sm'
-                      }`}>
-                        <p className="text-sm leading-relaxed">{msg.text}</p>
-                        <p className={`text-xs mt-1 ${isClient ? 'text-indigo-200' : 'text-slate-400'}`}>
-                          {isClient ? 'You' : 'Freelancer'} · {ts}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })
+                messages.map((msg) => (
+                  <MessageBubble
+                    key={msg.id}
+                    message={msg}
+                    isOwnMessage={msg.sender === 'client'}
+                    ownLabel="You"
+                    otherLabel="Freelancer"
+                  />
+                ))
               )}
             </div>
 
-            <form onSubmit={handleSendMsg} className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Type your message…"
-                value={msgText}
-                onChange={(e) => setMsgText(e.target.value)}
-                id="client-msg-input"
-                className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-              />
-              <button
-                type="submit"
-                disabled={sendingMsg || !msgText.trim()}
-                id="client-send-btn"
-                className="w-11 h-11 flex items-center justify-center text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                title="Send message"
-              >
-                {sendingMsg ? <Zap size={15} className="text-white thunder-loader" /> : <Send size={15} />}
-              </button>
-            </form>
+            <MessageForm
+              msgText={msgText}
+              setMsgText={setMsgText}
+              onSubmit={handleSendMsg}
+              sending={sendingMsg}
+              inputId="client-msg-input"
+              buttonId="client-send-btn"
+              placeholder="Type your message\u2026"
+            />
           </div>
         )}
 

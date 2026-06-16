@@ -4,6 +4,7 @@ import {
   addDoc, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { mapDocs, sortByTimestamp } from '../utils/firestoreHelpers';
 
 export function useMessages(projectId) {
   const [messages, setMessages] = useState([]);
@@ -29,13 +30,8 @@ export function useMessages(projectId) {
     const unsubscribe = onSnapshot(
       q,
       (snap) => {
-        const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        // Sort ascending by timestamp client-side
-        data.sort((a, b) => {
-          const aTime = a.timestamp?.toMillis?.() ?? 0;
-          const bTime = b.timestamp?.toMillis?.() ?? 0;
-          return aTime - bTime;
-        });
+        const data = mapDocs(snap);
+        sortByTimestamp(data, 'timestamp', 'asc');
         setMessages(data);
         setLoading(false);
       },
