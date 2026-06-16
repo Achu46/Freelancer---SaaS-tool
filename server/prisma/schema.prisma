@@ -1,0 +1,500 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  SUPER_ADMIN
+  CLINIC_OWNER
+  DOCTOR
+  RECEPTIONIST
+  PATIENT
+}
+
+enum PlanCode {
+  TRIAL
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CHECKED_IN
+  WAITING
+  IN_CONSULTATION
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum QueueStatus {
+  WAITING
+  CALLED
+  IN_SERVICE
+  COMPLETED
+  SKIPPED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  PARTIALLY_PAID
+  VOID
+  OVERDUE
+}
+
+enum PaymentStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+enum NotificationChannel {
+  WHATSAPP
+  EMAIL
+  SMS
+  IN_APP
+}
+
+model Clinic {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  legalName     String?
+  phone         String?
+  email         String?
+  address       Json?
+  planCode      PlanCode       @default(TRIAL)
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  users         User[]
+  doctors       Doctor[]
+  patients      Patient[]
+  appointments  Appointment[]
+  invoices      Invoice[]
+  payments      Payment[]
+  subscriptions Subscription[]
+  auditLogs     AuditLog[]
+  settings      SystemSetting[]
+}
+
+model User {
+  id               String         @id @default(cuid())
+  clinicId         String?
+  clinic           Clinic?        @relation(fields: [clinicId], references: [id])
+  email            String         @unique
+  phone            String?
+  passwordHash     String
+  fullName         String
+  role             RoleName
+  isActive         Boolean        @default(true)
+  emailVerifiedAt  DateTime?
+  phoneVerifiedAt  DateTime?
+  twoFactorEnabled Boolean        @default(false)
+  lastLoginAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  doctor           Doctor?
+  patient          Patient?
+  refreshTokens    RefreshToken[]
+  activityLogs     ActivityLog[]
+  supportMessages  SupportMessage[]
+
+  @@index([clinicId, role])
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        RoleName     @unique
+  description String?
+  permissions Permission[]
+}
+
+model Permission {
+  id          String @id @default(cuid())
+  roleId      String
+  role        Role   @relation(fields: [roleId], references: [id])
+  resource    String
+  action      String
+  description String?
+
+  @@unique([roleId, resource, action])
+}
+
+model Doctor {
+  id              String          @id @default(cuid())
+  clinicId        String
+  clinic          Clinic          @relation(fields: [clinicId], references: [id])
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id])
+  specialty       String
+  licenseNumber   String
+  consultationFee Decimal         @db.Decimal(10, 2)
+  slots           AppointmentSlot[]
+  appointments    Appointment[]
+  prescriptions   Prescription[]
+  medicalRecords  MedicalRecord[]
+
+  @@index([clinicId, specialty])
+}
+
+model Staff {
+  id        String   @id @default(cuid())
+  clinicId  String
+  userId    String
+  role      RoleName
+  jobTitle  String
+  joinedAt  DateTime @default(now())
+  isActive  Boolean  @default(true)
+
+  @@index([clinicId, role])
+}
+
+model Patient {
+  id             String          @id @default(cuid())
+  clinicId       String
+  clinic         Clinic          @relation(fields: [clinicId], references: [id])
+  userId         String?         @unique
+  user           User?           @relation(fields: [userId], references: [id])
+  mrn            String
+  fullName       String
+  dateOfBirth    DateTime?
+  gender         String?
+  phone          String
+  email          String?
+  bloodGroup     String?
+  allergies      String[]
+  familyMembers  FamilyMember[]
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+  prescriptions  Prescription[]
+  labReports     LabReport[]
+  invoices       Invoice[]
+  supportTickets SupportTicket[]
+
+  @@unique([clinicId, mrn])
+  @@index([clinicId, phone])
+}
+
+model FamilyMember {
+  id          String  @id @default(cuid())
+  clinicId    String
+  patientId   String
+  patient     Patient @relation(fields: [patientId], references: [id])
+  fullName    String
+  relation    String
+  phone       String?
+  dateOfBirth DateTime?
+
+  @@index([clinicId, patientId])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  clinicId    String
+  clinic      Clinic            @relation(fields: [clinicId], references: [id])
+  patientId   String
+  patient     Patient           @relation(fields: [patientId], references: [id])
+  doctorId    String
+  doctor      Doctor            @relation(fields: [doctorId], references: [id])
+  slotId      String?
+  slot        AppointmentSlot?   @relation(fields: [slotId], references: [id])
+  startsAt    DateTime
+  endsAt      DateTime?
+  status      AppointmentStatus @default(BOOKED)
+  reason      String
+  notes       String?
+  queueToken  QueueToken?
+  invoice     Invoice?
+  followUps   FollowUp[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([clinicId, startsAt])
+  @@index([clinicId, patientId])
+  @@index([clinicId, doctorId])
+}
+
+model AppointmentSlot {
+  id           String        @id @default(cuid())
+  clinicId     String
+  doctorId     String
+  doctor       Doctor        @relation(fields: [doctorId], references: [id])
+  startsAt     DateTime
+  endsAt       DateTime
+  isAvailable  Boolean       @default(true)
+  appointments Appointment[]
+
+  @@unique([clinicId, doctorId, startsAt])
+}
+
+model QueueToken {
+  id            String       @id @default(cuid())
+  clinicId      String
+  appointmentId String       @unique
+  appointment   Appointment  @relation(fields: [appointmentId], references: [id])
+  tokenNumber   String
+  status        QueueStatus  @default(WAITING)
+  priority      String       @default("NORMAL")
+  room          String?
+  calledAt      DateTime?
+  completedAt   DateTime?
+
+  @@unique([clinicId, tokenNumber])
+}
+
+model Prescription {
+  id           String             @id @default(cuid())
+  clinicId     String
+  patientId    String
+  patient      Patient            @relation(fields: [patientId], references: [id])
+  doctorId     String
+  doctor       Doctor             @relation(fields: [doctorId], references: [id])
+  diagnosis    String
+  instructions String?
+  signedAt     DateTime?
+  items        PrescriptionItem[]
+  createdAt    DateTime           @default(now())
+
+  @@index([clinicId, patientId])
+}
+
+model PrescriptionItem {
+  id             String       @id @default(cuid())
+  clinicId       String
+  prescriptionId String
+  prescription   Prescription @relation(fields: [prescriptionId], references: [id])
+  medicine       String
+  dosage         String
+  frequency      String
+  duration       String
+  notes          String?
+}
+
+model MedicalRecord {
+  id          String   @id @default(cuid())
+  clinicId    String
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  doctorId    String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id])
+  recordType  String
+  title       String
+  summary     String?
+  attachments Json?
+  createdAt   DateTime @default(now())
+
+  @@index([clinicId, patientId, recordType])
+}
+
+model LabReport {
+  id          String   @id @default(cuid())
+  clinicId    String
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  reportName  String
+  status      String
+  resultUrl   String?
+  orderedAt   DateTime @default(now())
+  reportedAt  DateTime?
+
+  @@index([clinicId, patientId])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  clinicId      String
+  clinic        Clinic        @relation(fields: [clinicId], references: [id])
+  patientId     String
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  appointmentId String?       @unique
+  appointment   Appointment?  @relation(fields: [appointmentId], references: [id])
+  invoiceNumber String
+  status        InvoiceStatus @default(DRAFT)
+  subtotal      Decimal       @db.Decimal(10, 2)
+  tax           Decimal       @db.Decimal(10, 2)
+  total         Decimal       @db.Decimal(10, 2)
+  dueDate       DateTime?
+  items         InvoiceItem[]
+  payments      Payment[]
+  createdAt     DateTime      @default(now())
+
+  @@unique([clinicId, invoiceNumber])
+  @@index([clinicId, patientId])
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  clinicId    String
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  description String
+  quantity    Int
+  unitAmount  Decimal @db.Decimal(10, 2)
+  total       Decimal @db.Decimal(10, 2)
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  clinicId       String
+  clinic         Clinic        @relation(fields: [clinicId], references: [id])
+  invoiceId      String
+  invoice        Invoice       @relation(fields: [invoiceId], references: [id])
+  provider       String
+  providerRef    String?
+  amount         Decimal       @db.Decimal(10, 2)
+  status         PaymentStatus @default(CREATED)
+  capturedAt     DateTime?
+  createdAt      DateTime      @default(now())
+
+  @@index([clinicId, status])
+}
+
+model SubscriptionPlan {
+  id           String         @id @default(cuid())
+  code         PlanCode       @unique
+  name         String
+  monthlyPrice Decimal?       @db.Decimal(10, 2)
+  yearlyPrice  Decimal?       @db.Decimal(10, 2)
+  limits       Json
+  features     Json
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id            String           @id @default(cuid())
+  clinicId      String
+  clinic        Clinic           @relation(fields: [clinicId], references: [id])
+  planId        String
+  plan          SubscriptionPlan @relation(fields: [planId], references: [id])
+  status        String
+  billingCycle  String
+  razorpaySubId String?
+  trialEndsAt   DateTime?
+  currentEndsAt DateTime?
+  createdAt     DateTime         @default(now())
+
+  @@index([clinicId, status])
+}
+
+model Notification {
+  id         String              @id @default(cuid())
+  clinicId   String
+  patientId  String?
+  channel    NotificationChannel
+  templateId String?
+  payload    Json
+  status     String
+  sentAt     DateTime?
+  createdAt  DateTime            @default(now())
+
+  @@index([clinicId, channel, status])
+}
+
+model NotificationTemplate {
+  id        String              @id @default(cuid())
+  clinicId  String?
+  code      String
+  channel   NotificationChannel
+  subject   String?
+  body      String
+  variables String[]
+  isActive  Boolean             @default(true)
+
+  @@unique([clinicId, code, channel])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
+  actorId   String?
+  action    String
+  resource  String
+  resourceId String?
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([clinicId, action, createdAt])
+}
+
+model SupportTicket {
+  id        String           @id @default(cuid())
+  clinicId  String
+  patientId String?
+  patient   Patient?         @relation(fields: [patientId], references: [id])
+  subject   String
+  status    String
+  priority  String
+  messages  SupportMessage[]
+  createdAt DateTime         @default(now())
+
+  @@index([clinicId, status, priority])
+}
+
+model SupportMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id])
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime      @default(now())
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  tokenHash   String   @unique
+  deviceId    String?
+  ipAddress   String?
+  userAgent   String?
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  event     String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model FollowUp {
+  id            String      @id @default(cuid())
+  clinicId      String
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  dueAt         DateTime
+  reason        String
+  status        String      @default("OPEN")
+
+  @@index([clinicId, dueAt, status])
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
+  key       String
+  value     Json
+  isSecret  Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  @@unique([clinicId, key])
+}
