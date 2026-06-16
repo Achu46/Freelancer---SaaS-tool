@@ -14,7 +14,8 @@ export default function Navbar() {
       await logout();
       navigate('/');
       toast.success('Logged out successfully');
-    } catch {
+    } catch (err) {
+      console.error('Logout failed:', err);
       toast.error('Failed to log out');
     }
   }

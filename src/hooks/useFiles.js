@@ -17,10 +17,12 @@ export function useFiles(projectId) {
   const [uploading, setUploading] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState(null);
 
   const fetchFiles = useCallback(async () => {
     if (!projectId) return;
     setLoading(true);
+    setError(null);
     try {
       const q = query(
         collection(db, 'files'),
@@ -31,6 +33,7 @@ export function useFiles(projectId) {
       setFiles(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     } catch (err) {
       console.error('useFiles error:', err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -108,5 +111,5 @@ export function useFiles(projectId) {
     });
   }
 
-  return { files, loading, uploading, isCompressing, uploadProgress, uploadFile, refetch: fetchFiles };
+  return { files, loading, error, uploading, isCompressing, uploadProgress, uploadFile, refetch: fetchFiles };
 }

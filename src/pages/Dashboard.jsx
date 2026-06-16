@@ -79,7 +79,8 @@ export default function Dashboard() {
     try {
       await deleteProject(deleteId);
       toast.success('Project deleted');
-    } catch {
+    } catch (err) {
+      console.error('confirmDelete failed:', err);
       toast.error('Failed to delete project');
     } finally {
       setDeleteId(null);

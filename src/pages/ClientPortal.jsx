@@ -181,7 +181,8 @@ export default function ClientPortal() {
 
       setMsgText('');
       toast.success('Message sent!');
-    } catch {
+    } catch (err) {
+      console.error('Client sendMessage failed:', err);
       toast.error('Failed to send message');
     } finally {
       setSendingMsg(false);
